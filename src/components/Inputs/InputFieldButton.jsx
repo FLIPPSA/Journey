@@ -1,93 +1,83 @@
 import * as React from "react";
-import {Text, StyleSheet, View} from "react-native";
+import { Text, StyleSheet, View } from "react-native";
+import { colors, typography, sizes } from "../../utils/design";
 
-export default function InputFieldButton({state = "Default"}) {
-  	const isActive = state === "Active";
+export default function InputFieldButton({ state = "Active" }) {
+	const isActive = state === "Active";
 
-  	return (
-    		<View style={styles.inputFieldButton}>
-      			<View
-        				style={[
-          					styles.inputContainer,
-          					isActive ? styles.inputActive : styles.inputDefault,
-        				]}
-      			>
-        				<View style={styles.inputArea}>
-          					<Text
-            						style={[
-              							styles.inputText,
-              							isActive ? styles.textActive : styles.textDefault,
-            						]}
-          					>
-            						Write a message...
-          					</Text>
-          					{isActive && <View style={styles.cursor} />}
-        				</View>
-        				<View style={[styles.button, isActive && styles.buttonActive]}>
-          					<Text style={styles.buttonText}>Send</Text>
-        				</View>
-      			</View>
-    		</View>
-  	);
-};
+	return (
+		<View
+			style={[
+				styles.inputContainer,
+				isActive ? styles.inputActive : styles.inputDefault,
+			]}
+		>
+			<View style={styles.inputArea}>
+				<Text
+					style={[
+						styles.inputText,
+						isActive ? styles.textActive : styles.textDefault,
+					]}
+				>
+					Write a message...
+				</Text>
+			</View>
+			<View style={[styles.button, isActive && styles.buttonActive]}>
+				<Text style={styles.buttonText}>Send</Text>
+			</View>
+		</View>
+	);
+}
 
 const styles = StyleSheet.create({
-  	inputFieldButton: {
-    		width: "100%",
-    		padding: 20,
-  	},
-  	inputContainer: {
-    		flexDirection: "row",
-    		alignItems: "center",
-    		borderWidth: 1,
-    		borderRadius: 8,
-    		backgroundColor: "#fff",
-    		overflow: "hidden",
-  	},
-  	inputDefault: {
-    		borderColor: "#757575",
-  	},
-  	inputActive: {
-    		borderColor: "#af731e",
-  	},
-  	inputArea: {
-    		flex: 1,
-    		flexDirection: "row",
-    		alignItems: "center",
-    		paddingHorizontal: 12,
-  	},
-  	inputText: {
-    		fontSize: 14,
-    		fontFamily: "Comfortaa-Light",
-    		fontWeight: "300",
-  	},
-  	textDefault: {
-    		color: "#757575",
-  	},
-  	textActive: {
-    		color: "#1e1e1e",
-  	},
-  	cursor: {
-    		backgroundColor: "#1e1e1e",
-    		width: 1,
-    		height: 16,
-    		marginLeft: 2,
-  	},
-  	button: {
-    		padding: 12,
-    		borderTopRightRadius: 8,
-    		borderBottomRightRadius: 8,
-    		borderLeftWidth: 1,
-    		borderColor: "#af731e",
-    		backgroundColor: "#c57e1b",
-  	},
-  	buttonActive: {
-    		backgroundColor: "#c57e1b",
-  	},
-  	buttonText: {
-    		fontSize: 14,
-    		fontFamily: "Comfortaa-Bold",
-    		fontWeight: "700",
-    		color: "#f5f5f5",
-  	},
+	inputContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+		width: "100%",
+		borderWidth: sizes.stroke[1],
+		gap: sizes.space[8],
+		borderRadius: sizes.radius[8],
+		backgroundColor: colors.background.default.default(),
+		overflow: "hidden",
+	},
+	inputDefault: {
+		borderColor: colors.border.default.secondary(),
+	},
+	inputActive: {
+		borderColor: colors.border.brand.default(),
+	},
+	inputArea: {
+		flex: 1,
+		flexDirection: "row",
+		alignItems: "center",
+		paddingHorizontal: sizes.space[12],
+	},
+	inputText: {
+		fontSize: typography.styles.body.sizes.small(),
+		fontFamily: typography.styles.body.fontFamily(),
+		fontWeight: typography.styles.body.fontWeights.regular(),
+	},
+	textDefault: {
+		color: colors.text.default.secondary(),
+	},
+	textActive: {
+		color: colors.text.default.default(),
+	},
+	button: {
+		padding: sizes.space[12],
+		borderTopRightRadius: sizes.radius[8],
+		borderBottomRightRadius: sizes.radius[8],
+		borderWidth: sizes.stroke[1],
+		borderColor: colors.border.brand.default(),
+		backgroundColor: colors.background.brand.default(),
+	},
+	buttonActive: {
+		backgroundColor: colors.background.brand.default(),
+	},
+	buttonText: {
+		fontSize: typography.styles.body.sizes.small(),
+		fontFamily: typography.styles.body.fontFamily(),
+		fontWeight: typography.styles.body.fontWeights.bold(),
+		color: colors.text.default.inverse(),
+	},
 });

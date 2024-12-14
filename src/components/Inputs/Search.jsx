@@ -1,94 +1,63 @@
 import * as React from "react";
-import {Text, StyleSheet, Image, View} from "react-native";
+import { Text, StyleSheet, Image, View } from "react-native";
+import { colors, typography, sizes } from "../../utils/design";
+import Feather from "@expo/vector-icons/Feather";
 
-export default function Search({state = "Default", text = "Search"}) {
-  	const getStylesByState = (state) => {
-    		switch (state) {
-      			case "Default":
-        				return styles.statedefault;
-      			case "Entered":
-        				return styles.stateentered;
-      			case "Active":
-        				return styles.stateactive;
-      			default:
-        				return styles.statedefault;
-    		}
-  	};
+export default function Search({ state = "Default", text = "Search" }) {
+	const getStylesByState = (state) => {
+		switch (state) {
+			case "Default":
+				return styles.statedefault;
+			case "Entered":
+				return styles.stateentered;
+			case "Active":
+				return styles.stateactive;
+			default:
+				return styles.statedefault;
+		}
+	};
 
-  	return (
-    		<View style={styles.search}>
-      			<View style={[styles.stateactiveLayout, getStylesByState(state)]}>
-        				{state === "Entered" && (
-          					<View style={styles.inputArea}>
-            						<Text style={styles.searchTypo}>{text}</Text>
-            						<View style={styles.cursor} />
-          					</View>
-        				)}
-        				{state !== "Entered" && (
-          					<Text style={styles.searchTypo}>{text}</Text>
-        				)}
-        				<Image style={styles.searchIcon} resizeMode="cover" source="Search.png" />
-      			</View>
-    		</View>
-  	);
-};
+	return (
+		<View style={[styles.stateactiveLayout, getStylesByState(state)]}>
+			<Text style={styles.searchText}>{text}</Text>
+			<Feather
+				name="search"
+				size={20}
+				color={colors.icon.default.default()}
+			/>
+		</View>
+	);
+}
 
 const styles = StyleSheet.create({
-  	stateactiveLayout: {
-    		maxHeight: 48,
-    		gap: 8,
-    		paddingVertical: 12,
-    		paddingHorizontal: 16,
-    		borderWidth: 1,
-    		borderStyle: "solid",
-    		backgroundColor: "#f5f5f5",
-    		borderRadius: 9999,
-    		alignSelf: "stretch",
-    		alignItems: "center",
-    		flexDirection: "row",
-    		overflow: "hidden",
-  	},
-  	searchTypo: {
-    		color: "#1e1e1e",
-    		textAlign: "left",
-    		fontFamily: "Comfortaa-Light",
-    		fontWeight: "300",
-    		fontSize: 14,
-  	},
-  	searchIcon: {
-    		width: 16,
-    		height: 16,
-    		overflow: "hidden",
-  	},
-  	statedefault: {
-    		borderColor: "#d9d9d9",
-  	},
-  	stateentered: {
-    		borderColor: "#af731e",
-  	},
-  	stateactive: {
-    		borderColor: "#1e1e1e",
-  	},
-  	cursor: {
-    		backgroundColor: "#1e1e1e",
-    		width: 1,
-    		height: 16,
-  	},
-  	inputArea: {
-    		gap: 2,
-    		flex: 1,
-    		alignItems: "center",
-    		flexDirection: "row",
-  	},
-  	search: {
-    		borderRadius: 8,
-    		borderStyle: "dashed",
-    		borderColor: "#303030",
-    		borderWidth: 2,
-    		width: "100%",
-    		justifyContent: "center",
-    		padding: 21,
-    		gap: 22,
-    		overflow: "hidden",
-  	},
+	stateactiveLayout: {
+		maxHeight: sizes.space[48],
+		gap: sizes.space[8],
+		paddingVertical: sizes.space[12],
+		paddingHorizontal: sizes.space[16],
+		borderWidth: sizes.stroke[1],
+		borderStyle: "solid",
+		backgroundColor: colors.primitives.gray[100],
+		borderRadius: sizes.radius.circle,
+		alignSelf: "stretch",
+		alignItems: "center",
+		flexDirection: "row",
+	},
+	searchText: {
+		color: colors.text.default.secondary(),
+		textAlign: "left",
+		flex: 1,
+		fontFamily: typography.styles.body.fontFamily(),
+		fontWeight: typography.styles.body.fontWeights.regular(),
+		fontSize: typography.styles.body.sizes.small(),
+	},
+	statedefault: {
+		borderColor: colors.border.default.default(),
+	},
+	stateentered: {
+		borderColor: colors.border.brand.secondary(),
+	},
+	stateactive: {
+		borderColor: colors.border.default.tertiary(),
+	},
 });

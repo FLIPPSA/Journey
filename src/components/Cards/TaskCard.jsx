@@ -21,7 +21,8 @@ export default function TaskCard({
 	const circleRadius = sizes.space[48];
 	const strokeWidth = sizes.stroke[4];
 	const circleCircumference = 2 * Math.PI * circleRadius;
-	const progressStrokeDashoffset = circleCircumference - (progress * 10 / 100) * circleCircumference;
+	const progressStrokeDashoffset =
+		circleCircumference - ((progress * 10) / 100) * circleCircumference;
 
 	return (
 		<View style={styles.taskCard}>
@@ -38,7 +39,7 @@ export default function TaskCard({
 						}}
 					/>
 					<View style={styles.overlay} />
-                    {showProgress && (
+					{showProgress && (
 						<View style={styles.progressContainer}>
 							<Svg
 								width={circleRadius * 2 + strokeWidth}
@@ -64,7 +65,9 @@ export default function TaskCard({
 									strokeDasharray={`${circleCircumference} ${circleCircumference}`}
 									strokeDashoffset={progressStrokeDashoffset}
 									strokeLinecap="round"
-                                    transform={`rotate(-90 ${circleRadius + strokeWidth / 2} ${circleRadius + strokeWidth / 2})`}
+									transform={`rotate(-90 ${
+										circleRadius + strokeWidth / 2
+									} ${circleRadius + strokeWidth / 2})`}
 								/>
 							</Svg>
 							<Text style={styles.progressText}>{progress}</Text>
@@ -164,14 +167,14 @@ const styles = StyleSheet.create({
 	fitnessHeader: {
 		backgroundColor: colors.background.default.default(),
 	},
-    imageContainer: {
-        position: "relative",
-        width: sizes.space[160],
-        height: sizes.space[160],
-        borderTopLeftRadius: sizes.radius[4],
-        borderBottomLeftRadius: sizes.radius[4],
-        overflow: "hidden",
-    },    
+	imageContainer: {
+		position: "relative",
+		width: sizes.space[160],
+		height: sizes.space[160],
+		borderTopLeftRadius: sizes.radius[4],
+		borderBottomLeftRadius: sizes.radius[4],
+		overflow: "hidden",
+	},
 	imgIcon: {
 		width: "100%",
 		height: "100%",
@@ -215,16 +218,16 @@ const styles = StyleSheet.create({
 		fontSize: typography.styles.body.sizes.xsmall(),
 		color: colors.text.default.secondary(),
 	},
-    rewards: {
+	rewards: {
 		flexDirection: "row",
 		gap: sizes.space[8],
 		alignItems: "center",
 	},
-    actionRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: sizes.space[8],
-    },
+	actionRow: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: sizes.space[8],
+	},
 	rewardItem: {
 		position: "relative",
 	},
