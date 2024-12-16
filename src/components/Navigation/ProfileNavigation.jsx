@@ -1,127 +1,106 @@
 import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
+import { colors, typography, sizes } from "../../utils/design";
+import Feather from "@expo/vector-icons/Feather";
 
 export default function ProfileNavigation({
-  showBack = true,
-  backLabel = "Back",
-  showProfile = true,
-  profileName = "Jenni So",
-  profileImage = require("./assets/Avatar.png"), // Replace with actual profile image path
-  showMenu = true,
+	showBack = true,
+	backLabel = "Back",
+	showProfile = true,
+	profileName = "Jenni So",
+	profileImage = "https://wallpapercave.com/wp/wp8781456.jpg",
+	showMenu = true,
 }) {
-  return (
-    <View style={[styles.profileNavigation, styles.iconButtonFlexBox]}>
-      {/* Back Button */}
-      {showBack && (
-        <View style={[styles.button, styles.buttonFlexBox]}>
-          <Image
-            style={styles.arrowLeftIcon}
-            resizeMode="cover"
-            source={require("./assets/ArrowLeft.png")} // Replace with actual back arrow image path
-          />
-          <Text style={[styles.buttonText, styles.nameTypo]}>{backLabel}</Text>
-        </View>
-      )}
+	return (
+		<View style={styles.container}>
+			{/* Back Button */}
+			{showBack && (
+				<View style={styles.button}>
+					<Feather
+						name="arrow-left"
+						size={24}
+						color={colors.icon.default.default()}
+					/>
+					<Text style={styles.backLabel}>{backLabel}</Text>
+				</View>
+			)}
 
-      {/* Profile Section */}
-      {showProfile && (
-        <View style={styles.avatarBlockContainer}>
-          <View style={styles.profileInfo}>
-            <Image
-              style={[styles.avatarIcon, styles.iconLayout]}
-              resizeMode="cover"
-              source={profileImage}
-            />
-            <View style={styles.info}>
-              <Text style={[styles.name, styles.nameTypo]}>{profileName}</Text>
-            </View>
-          </View>
+			{/* Profile Section */}
+			{showProfile && (
+				<View style={styles.avatarBlockContainer}>
+					<View style={styles.profileInfo}>
+						<Image
+							style={styles.profileImage}
+							resizeMode="cover"
+							source={{ uri: profileImage }}
+						/>
+						<Text style={styles.name}>{profileName}</Text>
+					</View>
 
-          {/* Menu Icon */}
-          {showMenu && (
-            <View style={[styles.iconButton, styles.iconLayout]}>
-              <Image
-                style={styles.menuIcon}
-                resizeMode="cover"
-                source={require("./assets/Menu.png")} // Replace with actual menu image path
-              />
-            </View>
-          )}
-        </View>
-      )}
-    </View>
-  );
-};
+					{/* Menu Icon */}
+					{showMenu && (
+						<Feather
+							name="menu"
+							size={24}
+							color={colors.icon.default.default()}
+						/>
+					)}
+				</View>
+			)}
+		</View>
+	);
+}
 
 const styles = StyleSheet.create({
-  iconButtonFlexBox: {
-    padding: 8,
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  buttonFlexBox: {
-    gap: 8,
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  nameTypo: {
-    textAlign: "left",
-    color: "#1e1e1e",
-    fontFamily: "Comfortaa-Bold",
-    fontWeight: "700",
-  },
-  iconLayout: {
-    height: 40,
-    width: 40,
-    overflow: "hidden",
-  },
-  arrowLeftIcon: {
-    width: 24,
-    height: 24,
-    overflow: "hidden",
-  },
-  buttonText: {
-    fontSize: 14,
-  },
-  button: {
-    borderRadius: 8,
-    padding: 12,
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  avatarIcon: {
-    borderRadius: 9999,
-  },
-  name: {
-    alignSelf: "stretch",
-    fontSize: 16,
-  },
-  info: {
-    width: 84,
-  },
-  iconButton: {
-    borderRadius: 32,
-    justifyContent: "center",
-    padding: 8,
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  avatarBlockContainer: {
-    gap: 4,
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  profileNavigation: {
-    backgroundColor: "#fff",
-    flex: 1,
-    width: "100%",
-    maxWidth: 744,
-    overflow: "hidden",
-  },
-  menuIcon: {
-    width: 24,
-    height: 24,
-    overflow: "hidden",
-  },
+	container: {
+		padding: sizes.space[8],
+		alignItems: "center",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		backgroundColor: colors.background.default.default(),
+		width: "100%",
+	},
+	name: {
+		color: colors.text.default.default(),
+		fontFamily: typography.styles.heading.fontFamily(),
+		fontWeight: typography.styles.heading.fontWeight(),
+		fontSize: typography.styles.heading.sizes.base(),
+	},
+	profileImage: {
+		height: sizes.icon.large,
+		width: sizes.icon.large,
+		borderRadius: sizes.radius.circle,
+	},
+	backLabel: {
+		fontSize: typography.styles.body.sizes.small(),
+		textAlign: "left",
+		color: colors.text.default.default(),
+		fontFamily: typography.primitives.family,
+		fontWeight: typography.styles.body.fontWeights.bold(),
+	},
+	button: {
+		gap: sizes.space[8],
+		alignItems: "center",
+		flexDirection: "row",
+		borderRadius: sizes.radius[8],
+		padding: sizes.space[12],
+		justifyContent: "center",
+	},
+	iconButton: {
+		borderRadius: sizes.radius[32],
+		justifyContent: "center",
+		padding: sizes.space[8],
+		alignItems: "center",
+		flexDirection: "row",
+	},
+	avatarBlockContainer: {
+		gap: sizes.space[4],
+		alignItems: "center",
+		flexDirection: "row",
+	},
+	profileInfo: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: sizes.space[8],
+	},
 });

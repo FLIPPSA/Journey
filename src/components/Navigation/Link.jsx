@@ -13,8 +13,8 @@ export default function Link({
 	iconEnd = "X.png",
 }) {
 	const getTextColor = () => {
-		if (variant === "Brand") return "#82581c";
-		return "#1e1e1e";
+		if (variant === "Brand") return colors.text.default.default();
+		return colors.text.default.default();
 	};
 
 	const getTextSize = () => {
@@ -28,7 +28,7 @@ export default function Link({
 	});
 
 	return (
-		<View style={[styles.linkContainer, styles.linkFlexBox]}>
+		<View style={styles.linkContainer}>
 			{hasIconStart && (
 				<Image
 					style={styles.icon}
@@ -62,27 +62,12 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		gap: sizes.space[4],
-		flexWrap: "wrap",
-		width: "100%",
-		borderRadius: sizes.radius[8],
-		borderStyle: "dashed",
-		borderColor: colors.border.brand.secondary(),
-		borderWidth: sizes.stroke[2],
-		padding: sizes.space[10],
-		alignContent: "flex-start",
-	},
-	linkFlexBox: {
-		alignItems: "center",
-		justifyContent: "center",
-		flexDirection: "row",
-		gap: sizes.space[4],
 	},
 	linkText: {
-		fontFamily: typography.primitives.family,
+		fontFamily: typography.styles.body.fontFamily(),
 		fontWeight: typography.styles.body.fontWeights.bold(),
-		textDecorationLine: "underline",
 		textAlign: "left",
-		color: colors.text.brand.default(),
+		color: colors.text.default.default(),
 	},
 	linkMedium: {
 		fontSize: typography.styles.body.sizes.small(),
@@ -91,11 +76,10 @@ const styles = StyleSheet.create({
 		fontSize: typography.styles.body.sizes.xsmall(),
 	},
 	activeText: {
-		textDecorationStyle: "solid",
+		textDecorationLine: "underline",
 	},
 	icon: {
 		width: sizes.icon.xxSmall,
 		height: sizes.icon.xxSmall,
-		display: "flex",
 	},
 });

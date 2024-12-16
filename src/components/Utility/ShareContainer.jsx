@@ -1,71 +1,40 @@
 import * as React from "react";
-import {Image, StyleSheet, View, Text} from "react-native";
+import { StyleSheet, View } from "react-native";
+import { colors, sizes } from "../../utils/design";
+import IconButton from "../Buttons/IconButton";
 
-export default function ShareContainer({buttons}) {
-  	return (
-    		<View style={styles.shareContainer}>
-      			<View style={[styles.inner, styles.iconFlexBox]}>
-        				{buttons.map((button, index) => (
-          					<View key={index} style={[styles.iconButton, styles.iconFlexBox]}>
-            						<View style={[styles.iconContainer, styles.iconFlexBox]}>
-              							<Image style={styles.linkIcon} resizeMode="cover" source={button.icon} />
-            						</View>
-            						<Text style={styles.text}>{button.label}</Text>
-          					</View>
-        				))}
-      			</View>
-    		</View>
-  	);
-};
+export default function ShareContainer({ buttons }) {
+	return (
+		<View style={styles.container}>
+			<View style={styles.inner}>
+				<IconButton from={"Feather"} icon={"copy"} variant="neutral" text="Copy Link" />
+				<IconButton from={"Feather"} icon={"share-2"} variant="neutral" text="Share To" />
+				<IconButton from={"Feather"} icon={"facebook"} variant="neutral" text="Facebook" />
+				<IconButton from={"Feather"} icon={"instagram"} variant="neutral" text="Instagram" />
+				<IconButton from={"FontAwesome6"} icon={"x-twitter"} variant="neutral" text="X" />
+			</View>
+		</View>
+	);
+}
 
 const styles = StyleSheet.create({
-  	iconFlexBox: {
-    		alignItems: "center",
-    		justifyContent: "center"
-  	},
-  	linkIcon: {
-    		width: 24,
-    		height: 24,
-    		overflow: "hidden"
-  	},
-  	iconContainer: {
-    		borderRadius: 9999,
-    		backgroundColor: "#e6e6e6",
-    		width: 40,
-    		height: 40,
-    		padding: 12,
-    		flexDirection: "row",
-    		alignItems: "center"
-  	},
-  	text: {
-    		fontSize: 12,
-    		fontWeight: "300",
-    		fontFamily: "Comfortaa-Light",
-    		color: "#1e1e1e",
-    		textAlign: "center"
-  	},
-  	iconButton: {
-    		borderRadius: 32,
-    		gap: 2,
-    		maxWidth: 64
-  	},
-  	inner: {
-    		width: 360,
-    		paddingHorizontal: 16,
-    		paddingVertical: 0,
-    		gap: 16,
-    		flexDirection: "row",
-    		alignItems: "center"
-  	},
-  	shareContainer: {
-    		backgroundColor: "#fff",
-    		borderStyle: "solid",
-    		borderColor: "#d9d9d9",
-    		borderTopWidth: 1,
-    		flex: 1,
-    		width: "100%",
-    		paddingHorizontal: 0,
-    		paddingVertical: 12,
-    		justifyContent: "center"
-  	}
+	container: {
+		backgroundColor: colors.background.default.default(),
+		borderStyle: "solid",
+		borderColor: colors.border.default.default(),
+		borderTopWidth: sizes.stroke[1],
+		width: "100%",
+		paddingHorizontal: sizes.space[0],
+		paddingVertical: sizes.space[12],
+		justifyContent: "center",
+	},
+    inner: {
+		width: sizes.space[360],
+		paddingHorizontal: sizes.space[16],
+		paddingVertical: sizes.space[0],
+		gap: sizes.space[16],
+		flexDirection: "row",
+		justifyContent: "center",
+		alignItems: "center",
+	},
 });

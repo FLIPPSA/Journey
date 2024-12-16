@@ -1,19 +1,25 @@
 import React from "react";
 import { StyleSheet, View, Text, Image, TouchableOpacity } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
+import Feather from "@expo/vector-icons/Feather";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 export default function IconButton({
 	variant = "primary", // primary, neutral, tertiary
 	active = false,
 	size = "medium", // medium, small, x-small
 	icon,
+	from = "Image",
 	showText = true,
 	text = "Text",
 	onPress,
 }) {
 	const getStyles = () => {
 		const baseStyle = {
-			iconContainer: [styles.iconContainer, styles[`${variant}${active ? "Active" : ""}`]],
+			iconContainer: [
+				styles.iconContainer,
+				styles[`${variant}${active ? "Active" : ""}`],
+			],
 			iconSizes: styles[`icon${size}`],
 			textStyle: styles[`text${size}`],
 		};
@@ -25,7 +31,23 @@ export default function IconButton({
 	return (
 		<TouchableOpacity style={styles.container} onPress={onPress}>
 			<View style={iconContainer}>
-				<Image source={icon} style={styles.icon} />
+				{from === "Feather" && (
+					<Feather
+						name={icon}
+						size={24}
+						color={colors.icon.default.default()}
+					/>
+				)}
+				{from === "Image" && (
+					<Image source={icon} style={styles.icon} />
+				)}
+				{from === "FontAwesome6" && (
+					<FontAwesome6
+						name={icon}
+						size={24}
+						color={colors.icon.default.default()}
+					/>
+				)}
 			</View>
 			{showText && <Text style={textStyle}>{text}</Text>}
 		</TouchableOpacity>
@@ -38,10 +60,10 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		gap: sizes.space[2],
 	},
-    iconContainer: {
-        borderRadius: sizes.radius.circle,
-        padding: sizes.space[8],
-    },
+	iconContainer: {
+		borderRadius: sizes.radius.circle,
+		padding: sizes.space[8],
+	},
 	primary: {
 		backgroundColor: colors.background.brand.default(),
 	},

@@ -1,66 +1,70 @@
 import * as React from "react";
-import {Image, StyleSheet, Text, View} from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
+import { colors, typography, sizes } from "../../utils/design";
+import Feather from "@expo/vector-icons/Feather";
 
-export default function MenuItem({icon, title, description}) {
-  	return (
-    		<View style={styles.menuItem}>
-      			<Image style={styles.icon} resizeMode="cover" source={icon} />
-      			<View style={styles.body}>
-        				<View style={styles.row}>
-          					<Text style={styles.label}>{title}</Text>
-          					<Image style={styles.arrowRightIcon} resizeMode="cover" source="Arrow right.png" />
-        				</View>
-        				<Text style={styles.description}>{description}</Text>
-      			</View>
-    		</View>
-  	);
-};
+export default function MenuItem({
+	icon = "user",
+	title = "Account Center",
+	description = "Password, Manage Account",
+}) {
+	return (
+		<View style={styles.container}>
+			<Feather
+				name={icon}
+				size={24}
+				color={colors.icon.default.default()}
+			/>
+			<View style={styles.body}>
+				<View style={styles.row}>
+					<Text style={styles.label}>{title}</Text>
+					<Feather
+						name="arrow-right"
+						size={24}
+						color={colors.icon.default.default()}
+					/>
+				</View>
+				<Text style={styles.description}>{description}</Text>
+			</View>
+		</View>
+	);
+}
 
 const styles = StyleSheet.create({
-  	icon: {
-    		width: 20,
-    		height: 20,
-    		overflow: "hidden"
-  	},
-  	label: {
-    		fontSize: 14,
-    		fontWeight: "700",
-    		fontFamily: "Comfortaa-Bold",
-    		color: "#1e1e1e",
-    		textAlign: "left",
-    		flex: 1
-  	},
-  	arrowRightIcon: {
-    		width: 24,
-    		height: 24,
-    		overflow: "hidden"
-  	},
-  	row: {
-    		alignItems: "center",
-    		justifyContent: "space-between",
-    		alignSelf: "stretch",
-    		flexDirection: "row"
-  	},
-  	description: {
-    		fontSize: 12,
-    		fontWeight: "300",
-    		fontFamily: "Comfortaa-Light",
-    		color: "#757575",
-    		textAlign: "left",
-    		alignSelf: "stretch"
-  	},
-  	body: {
-    		gap: 4,
-    		flex: 1
-  	},
-  	menuItem: {
-    		borderRadius: 8,
-    		width: "100%",
-    		paddingHorizontal: 16,
-    		paddingVertical: 12,
-    		gap: 12,
-    		flexDirection: "row",
-    		overflow: "hidden",
-    		flex: 1
-  	}
+	container: {
+		borderRadius: sizes.radius[8],
+		width: "100%",
+		paddingHorizontal: sizes.space[16],
+		paddingVertical: sizes.space[12],
+		gap: sizes.space[12],
+		flexDirection: "row",
+		overflow: "hidden",
+		flex: 1,
+	},
+	label: {
+		fontSize: typography.styles.body.sizes.base(),
+		fontWeight: typography.styles.body.fontWeights.bold(),
+		fontFamily: typography.styles.body.fontFamily(),
+		color: colors.text.default.default(),
+		textAlign: "left",
+		flex: 1,
+	},
+	row: {
+		alignItems: "center",
+		justifyContent: "space-between",
+		alignSelf: "stretch",
+		flexDirection: "row",
+	},
+	description: {
+		fontSize: typography.styles.body.sizes.small(),
+		fontWeight: typography.styles.body.fontWeights.regular(),
+		fontFamily: typography.styles.body.fontFamily(),
+		color: colors.text.default.secondary(),
+		textAlign: "left",
+		alignSelf: "stretch",
+	},
+	body: {
+		gap: sizes.space[4],
+		flex: 1,
+	},
 });

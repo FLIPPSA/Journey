@@ -31,7 +31,7 @@ export default function TextButton({
 	return (
 		<View
 			style={[
-				styles.textButton,
+				styles.container,
 				getSize(),
 				{ backgroundColor: getBackgroundColor() },
 			]}
@@ -42,7 +42,7 @@ export default function TextButton({
 }
 
 const styles = StyleSheet.create({
-	textButton: {
+	container: {
 		justifyContent: "center",
 		alignItems: "center",
 		borderRadius: sizes.radius.circle,
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
 		fontFamily: typography.styles.heading.fontFamily(),
 		fontWeight: typography.styles.heading.fontWeight(),
 		fontSize: typography.styles.heading.sizes.base(),
-		color: colors.text.default.inverse(),
+		color: colors.text.default.default(),
 	},
 	medium: {
 		height: sizes.space[64],
