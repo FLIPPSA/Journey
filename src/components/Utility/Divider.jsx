@@ -19,10 +19,10 @@ const styles = StyleSheet.create({
 	},
 	horizontal: {
 		height: sizes.stroke[1],
-		width: "100%",
+		flex: 1,
 	},
 	vertical: {
 		width: sizes.stroke[1],
-		height: "100%",
+		flex: 1,
 	},
 });

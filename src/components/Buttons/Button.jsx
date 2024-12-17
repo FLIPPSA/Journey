@@ -48,6 +48,7 @@ export default function Button({
 const styles = StyleSheet.create({
 	buttonBase: {
 		flexDirection: "row",
+        width: '100%',
 		alignItems: "center",
 		justifyContent: "center",
 		gap: sizes.space[8],

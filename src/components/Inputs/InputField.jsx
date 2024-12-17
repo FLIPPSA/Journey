@@ -1,12 +1,13 @@
 import * as React from "react";
 import { Text, StyleSheet, Image, View } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
+import Feather from '@expo/vector-icons/Feather';
 
 export default function InputField({
-	state = "default", // Default, Active, Error, Error-Active
-	valueType = "default", // Default, Placeholder
-	inline = false,
-	value = "Value",
+	state = "Default", // Default, Active, Error, Error-Active
+	valueType = "Default", // Default, Placeholder
+	inline = true,
+	value,
 	hasLabel = true,
 	label = "Label:",
 	hasDescription = false,
@@ -17,9 +18,9 @@ export default function InputField({
 	rightIcon = null, // Pass image source for right icon
 }) {
 	const borderColor =
-		state === "error" || hasError
+		state === "Error" || hasError
 			? "#900b09"
-			: state === "active" || state === "error-active"
+			: state === "Active" || state === "Error-Active"
 			? "#af731e"
 			: "#757575";
 
@@ -43,21 +44,13 @@ export default function InputField({
 				]}
 			>
 				{leftIcon && (
-					<Image
-						style={styles.icon}
-						resizeMode="cover"
-						source={leftIcon}
-					/>
+					<Feather name={leftIcon} size={24} color={colors.icon.default.default()} />
 				)}
 				<Text style={styles.valueTypo}>
 					{valueType === "placeholder" ? "" : value}
 				</Text>
 				{rightIcon && (
-					<Image
-						style={styles.icon}
-						resizeMode="cover"
-						source={rightIcon}
-					/>
+					<Feather name={rightIcon} size={24} color={colors.icon.default.default()} />
 				)}
 			</View>
 			{hasError && (

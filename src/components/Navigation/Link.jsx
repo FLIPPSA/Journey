@@ -13,7 +13,7 @@ export default function Link({
 	iconEnd = "X.png",
 }) {
 	const getTextColor = () => {
-		if (variant === "Brand") return colors.text.default.default();
+		if (variant === "Brand") return colors.text.brand.default();
 		return colors.text.default.default();
 	};
 
