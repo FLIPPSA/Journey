@@ -10,6 +10,8 @@ export default function Button({
 	label = "Button",
 	leftIcon = null,
 	rightIcon = null,
+    isLoading = false,
+    onPress = () => {}
 }) {
 	const buttonStyles = [
 		styles.buttonBase,
@@ -25,7 +27,7 @@ export default function Button({
 	];
 
 	return (
-		<TouchableOpacity style={buttonStyles}>
+		<TouchableOpacity style={buttonStyles} onPress={onPress}>
 			{leftIcon && (
 				<Feather
 					name={leftIcon}
@@ -48,7 +50,7 @@ export default function Button({
 const styles = StyleSheet.create({
 	buttonBase: {
 		flexDirection: "row",
-        width: '100%',
+        // width: '100%',
 		alignItems: "center",
 		justifyContent: "center",
 		gap: sizes.space[8],

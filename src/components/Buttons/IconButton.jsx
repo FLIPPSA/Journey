@@ -35,7 +35,7 @@ export default function IconButton({
 					<Feather
 						name={icon}
 						size={24}
-						color={colors.icon.default.default()}
+						color={colors.icon.default.inverse()}
 					/>
 				)}
 				{from === "Image" && (
@@ -45,7 +45,7 @@ export default function IconButton({
 					<FontAwesome6
 						name={icon}
 						size={24}
-						color={colors.icon.default.default()}
+						color={colors.icon.default.inverse()}
 					/>
 				)}
 			</View>

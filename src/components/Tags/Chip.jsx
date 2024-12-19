@@ -28,9 +28,8 @@ const styles = StyleSheet.create({
 		paddingHorizontal: sizes.space[8],
 		justifyContent: "center",
 		alignItems: "center",
-		flexDirection: "row",
 		borderRadius: sizes.radius.circle,
-		overflow: "hidden",
+        alignSelf: "flex-start",
 	},
 	inactiveChip: {
 		borderWidth: sizes.stroke[1],

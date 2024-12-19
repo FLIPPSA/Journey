@@ -6,12 +6,15 @@ import Message from "../src/pages/Message/Message";
 import NewPost from "../src/pages/NewPost/NewPost";
 import Tasklist from "../src/pages/TaskList/Tasklist";
 import Profile from "../src/pages/Profile/Profile";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Feather from "@expo/vector-icons/Feather";
 import { SafeAreaView, StatusBar } from "react-native";
 import { useEffect } from "react";
-import Splash from '../src/pages/Login/Splash';
-import Login from '../src/pages/Login/Login';
+import Splash from "../src/pages/Login/Splash";
+import Login from "../src/pages/Login/Login";
+import WelcomeBack from "../src/pages/WelcomeBack/WelcomeBack";
+import NewPostShare from "../src/pages/NewPost/NewPostShare";
+import { GlobalDataProvider } from '../src/utils/globalfetches';
+import { UserProvider } from '../src/utils/authentication';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -24,15 +27,45 @@ function NavBar() {
 				tabBarIcon: ({ color, size }) => {
 					switch (route.name) {
 						case "Home":
-							return <Feather name="home" size={size} color={color} />;
+							return (
+								<Feather
+									name="home"
+									size={size}
+									color={color}
+								/>
+							);
 						case "Message":
-							return <Feather name="message-circle" size={size} color={color} />;
+							return (
+								<Feather
+									name="message-circle"
+									size={size}
+									color={color}
+								/>
+							);
 						case "NewPost":
-							return <Feather name="plus" size={size} color={color} />;
+							return (
+								<Feather
+									name="plus"
+									size={size}
+									color={color}
+								/>
+							);
 						case "Tasklist":
-							return <Feather name="list" size={size} color={color} />;
+							return (
+								<Feather
+									name="list"
+									size={size}
+									color={color}
+								/>
+							);
 						case "Profile":
-							return <Feather name="user" size={size} color={color} />;
+							return (
+								<Feather
+									name="user"
+									size={size}
+									color={color}
+								/>
+							);
 					}
 				},
 				tabBarLabel: () => null,
@@ -53,22 +86,35 @@ export default function App() {
 	}, []);
 
 	return (
-		<GestureHandlerRootView style={{ flex: 1 }}>
-			<SafeAreaView style={{ flex: 1 }}>
-				{/* Remove NavigationContainer if it's already at root */}
-				<Stack.Navigator
-					screenOptions={{
-						headerShown: false,
-						gestureEnabled: true,
-						headerStyle: { backgroundColor: "red" },
-					}}
-				>
-                    <Stack.Screen name="Login" component={Login} />
-                    <Stack.Screen name="Splash" component={Splash} />
-					<Stack.Screen name="NavBar" component={NavBar} />
-					<Stack.Screen name="Home" component={Home} />
-				</Stack.Navigator>
-			</SafeAreaView>
-		</GestureHandlerRootView>
+		<UserProvider>
+			<GlobalDataProvider>
+				<GestureHandlerRootView style={{ flex: 1 }}>
+					<SafeAreaView style={{ flex: 1 }}>
+						{/* Remove NavigationContainer if it's already at root */}
+						<Stack.Navigator
+							screenOptions={{
+								headerShown: false,
+								gestureEnabled: true,
+								headerStyle: { backgroundColor: "red" },
+							}}
+						>
+							<Tab.Screen name="NewPost" component={NewPost} />
+							<Tab.Screen
+								name="NewPostShare"
+								component={NewPostShare}
+							/>
+							<Stack.Screen name="Home" component={Home} />
+							<Stack.Screen
+								name="WelcomeBack"
+								component={WelcomeBack}
+							/>
+							<Stack.Screen name="Login" component={Login} />
+							<Stack.Screen name="Splash" component={Splash} />
+							<Stack.Screen name="NavBar" component={NavBar} />
+						</Stack.Navigator>
+					</SafeAreaView>
+				</GestureHandlerRootView>
+			</GlobalDataProvider>
+		</UserProvider>
 	);
 }

@@ -1,28 +1,28 @@
-import * as React from "react";
-import { Text, StyleSheet, Image, View } from "react-native";
+import React, { useState } from "react";
+import { Text, StyleSheet, View, TextInput } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 import Feather from '@expo/vector-icons/Feather';
 
 export default function InputField({
-	state = "Default", // Default, Active, Error, Error-Active
-	valueType = "Default", // Default, Placeholder
-	inline = true,
-	value,
+	value = "",
+	onChangeText,
 	hasLabel = true,
 	label = "Label:",
 	hasDescription = false,
 	description = "Description",
 	hasError = false,
 	error = "Error",
-	leftIcon = null, // Pass image source for left icon
-	rightIcon = null, // Pass image source for right icon
+	leftIcon = null,
+	rightIcon = null,
+	placeholder = "Type here...",
 }) {
-	const borderColor =
-		state === "Error" || hasError
-			? "#900b09"
-			: state === "Active" || state === "Error-Active"
-			? "#af731e"
-			: "#757575";
+	const [isFocused, setIsFocused] = useState(false); // Track focus state
+
+	const borderColor = hasError
+		? colors.text.danger.default()
+		: isFocused
+		? colors.background.brand.default()
+		: colors.border.default.secondary();
 
 	return (
 		<View style={styles.inputField}>
@@ -37,18 +37,22 @@ export default function InputField({
 			<View
 				style={[
 					styles.inputContainer,
-					{
-						borderColor: borderColor,
-						flexDirection: inline ? "row" : "column",
-					},
+					{ borderColor },
 				]}
 			>
 				{leftIcon && (
 					<Feather name={leftIcon} size={24} color={colors.icon.default.default()} />
 				)}
-				<Text style={styles.valueTypo}>
-					{valueType === "placeholder" ? "" : value}
-				</Text>
+				<TextInput
+					style={styles.inputText}
+					placeholder={placeholder}
+					multiline={true}
+					onChangeText={onChangeText}
+					value={value}
+					placeholderTextColor={colors.text.default.secondary()}
+					onFocus={() => setIsFocused(true)}
+					onBlur={() => setIsFocused(false)}
+				/>
 				{rightIcon && (
 					<Feather name={rightIcon} size={24} color={colors.icon.default.default()} />
 				)}
@@ -78,24 +82,20 @@ const styles = StyleSheet.create({
 		gap: sizes.space[8],
 		padding: sizes.space[12],
 		backgroundColor: colors.background.default.default(),
-		alignItems: "center",
+		alignItems: "flex-start",
 		alignSelf: "stretch",
 		borderRadius: sizes.radius[8],
 		borderWidth: sizes.stroke[1],
-		borderColor: colors.border.default.secondary(),
 	},
-	valueTypo: {
+	inputText: {
 		color: colors.text.default.default(),
 		fontSize: typography.styles.body.sizes.small(),
 		fontFamily: typography.styles.body.fontFamily(),
 		fontWeight: typography.styles.body.fontWeights.regular(),
 		textAlign: "left",
-		flex: 1,
-	},
-	icon: {
-		width: sizes.icon.xSmall,
-		height: sizes.icon.xSmall,
-		overflow: "hidden",
+        // flex: 1, // Let it expand in height
+        minHeight: 20, // Set a minimum height for the input
+        maxHeight: 200, // Define the maximum height for controlled growth
 	},
 	errorText: {
 		color: colors.text.danger.default(),
@@ -106,5 +106,7 @@ const styles = StyleSheet.create({
 	inputField: {
 		width: "100%",
 		gap: sizes.space[2],
+        // flex: 1, // Allow the field to grow dynamically
+
 	},
 });
