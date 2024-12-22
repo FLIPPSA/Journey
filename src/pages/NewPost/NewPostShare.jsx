@@ -17,12 +17,17 @@ export default function NewPostShare({ route }) {
     const [isLoading, setIsLoading] = useState(false)
 
     async function handleInsertPost() {
-        setIsLoading(true);
-        await insertPost(userId, caption, selectedImages);
-        setIsLoading(false);
-        navigation.navigate("Home", {
-            uploaded: true
-        })
+        try {
+            setIsLoading(true);
+            await insertPost('userId', caption, selectedImages);
+            setIsLoading(false);
+            navigation.navigate("Home", {
+                uploaded: true
+            })
+        } catch(e) {
+            console.log('Error uploading post:', e)
+        }
+        
     }
 
 	// Render pagination dots

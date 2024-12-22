@@ -62,12 +62,12 @@ export const fetchAllTasksets = async () => {
 };
 
 export const fetchPosts = async ({ belongingDomain }) => {
-	const { data: clubs, error } = await supabase.from("posts").select("*");
+	const { data: posts, error } = await supabase.from("posts").select("*");
 
 	if (error) {
 		throw new Error(error.message);
 	}
-	return clubs;
+	return posts;
 };
 
 export async function insertPost(userId, caption, mediaUrl) {

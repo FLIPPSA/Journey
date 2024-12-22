@@ -11,10 +11,11 @@ import { SafeAreaView, StatusBar } from "react-native";
 import { useEffect } from "react";
 import Splash from "../src/pages/Login/Splash";
 import Login from "../src/pages/Login/Login";
+import SignUp from "../src/pages/Login/SignUp";
 import WelcomeBack from "../src/pages/WelcomeBack/WelcomeBack";
 import NewPostShare from "../src/pages/NewPost/NewPostShare";
-import { GlobalDataProvider } from '../src/utils/globalfetches';
-import { UserProvider } from '../src/utils/authentication';
+import { GlobalDataProvider } from "../src/utils/globalfetches";
+import { UserProvider } from "../src/utils/authentication";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -90,7 +91,6 @@ export default function App() {
 			<GlobalDataProvider>
 				<GestureHandlerRootView style={{ flex: 1 }}>
 					<SafeAreaView style={{ flex: 1 }}>
-						{/* Remove NavigationContainer if it's already at root */}
 						<Stack.Navigator
 							screenOptions={{
 								headerShown: false,
@@ -98,19 +98,21 @@ export default function App() {
 								headerStyle: { backgroundColor: "red" },
 							}}
 						>
+                            <Stack.Screen name="Login" component={Login} />
+                            <Stack.Screen name="Splash" component={Splash} />
+							<Stack.Screen name="NavBar" component={NavBar} />
+							<Stack.Screen name="Home" component={Home} />
 							<Tab.Screen name="NewPost" component={NewPost} />
 							<Tab.Screen
 								name="NewPostShare"
 								component={NewPostShare}
 							/>
-							<Stack.Screen name="Home" component={Home} />
 							<Stack.Screen
 								name="WelcomeBack"
 								component={WelcomeBack}
 							/>
-							<Stack.Screen name="Login" component={Login} />
-							<Stack.Screen name="Splash" component={Splash} />
-							<Stack.Screen name="NavBar" component={NavBar} />
+                                                        <Stack.Screen name="SignUp" component={SignUp} />
+
 						</Stack.Navigator>
 					</SafeAreaView>
 				</GestureHandlerRootView>

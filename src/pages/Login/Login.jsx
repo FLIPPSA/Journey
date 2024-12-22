@@ -9,7 +9,9 @@ import Button from "../../components/Buttons/Button";
 import Divider from "../../components/Utility/Divider";
 import Socials from "../../components/Icons/Socials";
 
-export default function Login() {
+export default function Login({ navigation }) {
+
+
 	return (
 		<View style={styles.container}>
 			<Logo showText={false} />
@@ -45,7 +47,7 @@ export default function Login() {
 						label="Remember Me"
 						hasDescription={false}
 					/>
-                    <Text>Hey</Text>
+					<Text>Hey</Text>
 				</View>
 			</View>
 
@@ -58,13 +60,13 @@ export default function Login() {
 
 			<View style={styles.socialContainer}>
 				<View style={styles.continueWith}>
-					<Divider />
+					<Divider vertical={false}/>
 					<Text>or continue with</Text>
-					<Divider />
+					<Divider vertical={false}/>
 				</View>
 				<View styles={styles.socialsContainer}>
-					<Socials type={"Facebook"} />
-					<Socials type={"Google"} />
+					<Socials name={"Facebook"} />
+					<Socials name={"Google"} />
 				</View>
 			</View>
 
@@ -75,6 +77,7 @@ export default function Login() {
 					state="Default"
 					size="Medium"
 					label="Sign Up"
+					onPress={() => navigation.navigate("SignUp")}
 				/>
 			</View>
 		</View>
@@ -90,21 +93,21 @@ const styles = StyleSheet.create({
 		paddingHorizontal: sizes.space[16],
 	},
 	loginText: {
-        fontSize: typography.styles.titlePage.sizes.base(),
-        fontFamily: typography.styles.titlePage.fontFamily(),
-        fontWeight: typography.styles.titlePage.fontWeight(),
-    },
+		fontSize: typography.styles.titlePage.sizes.base(),
+		fontFamily: typography.styles.titlePage.fontFamily(),
+		fontWeight: typography.styles.titlePage.fontWeight(),
+	},
 	mainContent: {
 		alignItems: "flex-end",
 		gap: sizes.space[16],
 	},
-    checkBox: {
-        width: "100%",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        alignSelf: "flex-start",
-    },
+	checkBox: {
+		width: "100%",
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "flex-start",
+		alignSelf: "flex-start",
+	},
 	socialContainer: {
 		gap: sizes.space[16],
 	},
@@ -115,6 +118,7 @@ const styles = StyleSheet.create({
 	},
 	socialsContainer: {
 		flexDirection: "row",
+        gap: sizes.space[24]
 	},
 	accountContainer: {
 		flexDirection: "row",

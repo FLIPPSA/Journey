@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 
 export default function Link({
@@ -11,6 +11,7 @@ export default function Link({
 	iconStart = "Star.png",
 	hasIconEnd = false,
 	iconEnd = "X.png",
+    onPress = () => {}
 }) {
 	const getTextColor = () => {
 		if (variant === "Brand") return colors.text.brand.default();
@@ -28,12 +29,12 @@ export default function Link({
 	});
 
 	return (
-		<View style={styles.linkContainer}>
+		<TouchableOpacity style={styles.linkContainer} onPress={onPress}>
 			{hasIconStart && (
 				<Image
 					style={styles.icon}
 					resizeMode="cover"
-					source={iconStart}
+					source={{ uri: iconStart }}
 				/>
 			)}
 			<Text
@@ -49,10 +50,10 @@ export default function Link({
 				<Image
 					style={styles.icon}
 					resizeMode="cover"
-					source={iconEnd}
+					source={{ uri: iconEnd }}
 				/>
 			)}
-		</View>
+		</TouchableOpacity>
 	);
 }
 
