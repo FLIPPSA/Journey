@@ -11,6 +11,7 @@ export const UserProvider = ({ children }) => {
             const { data } = await supabase.auth.getUser();
             setUser(data.user);
         };
+
         loadUser();
     }, []);
 

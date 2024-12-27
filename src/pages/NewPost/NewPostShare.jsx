@@ -1,12 +1,13 @@
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
-import React, { useState } from "react";
+import { useContext, useState } from "react";
 import UpperNavigationBack from "../../components/Navigation/UpperNavigationBack";
-import { insertPost, wp } from "../../utils/common";
+import { handlePostUpload, wp } from "../../utils/common";
 import { colors, sizes } from "../../utils/design";
 import Chip from "../../components/Tags/Chip";
 import InputField from "../../components/Inputs/InputField";
 import Button from "../../components/Buttons/Button";
 import { useNavigation } from "expo-router";
+import UserContext from "../../utils/authentication";
 
 export default function NewPostShare({ route }) {
     const navigation = useNavigation();
@@ -15,20 +16,7 @@ export default function NewPostShare({ route }) {
 	const [caption, setCaption] = useState("");
 	const [domains, setDomains] = useState([]);
     const [isLoading, setIsLoading] = useState(false)
-
-    async function handleInsertPost() {
-        try {
-            setIsLoading(true);
-            await insertPost('userId', caption, selectedImages);
-            setIsLoading(false);
-            navigation.navigate("Home", {
-                uploaded: true
-            })
-        } catch(e) {
-            console.log('Error uploading post:', e)
-        }
-        
-    }
+	const { user } = useContext(UserContext);
 
 	// Render pagination dots
 	const renderPaginationDots = () => {
@@ -98,7 +86,7 @@ export default function NewPostShare({ route }) {
 					size="medium"
 					label="Share Post"
                     isLoading={isLoading}
-                    onPress={handleInsertPost}
+                    onPress={async() => await handlePostUpload(navigation, selectedImages, caption, user.id)}
 				/>
 			</View>
 		</View>
