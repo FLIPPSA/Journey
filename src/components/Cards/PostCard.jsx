@@ -1,71 +1,274 @@
-import * as React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import {
+	Animated,
+	FlatList,
+	Image,
+	StyleSheet,
+	Text,
+	TouchableWithoutFeedback,
+	View,
+} from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 import { colors, typography, sizes } from "../../utils/design";
 import Button from "../Buttons/Button";
-import { wp, hp } from "../../utils/common";
+import {
+	wp,
+	hp,
+	removeLike,
+	addLike,
+	fetchUserLikedPostCheck,
+} from "../../utils/common";
+import { useEffect, useRef, useState } from "react";
+import { AntDesign } from "@expo/vector-icons";
 
 export default function PostCard({
-	name = "Jenni So",
-	time = "12:02 PM",
-	caption = "Encountered two rare Pokémon's! I was so lucky to see them in the distance. What a mystery",
-	image = "https://png.pngtree.com/thumb_back/fw800/background/20231224/pngtree-mountain-river-nature-wallpaper-image-image_15560315.jpg",
+	user,
+	id,
+	name = "Undefined",
+	time = "Some when",
+	caption = "Default caption",
+	images = [], // Default to an empty array
 	avatar = "https://wallpapercave.com/wp/wp8781456.jpg",
-	likes,
+	likes = 0,
 	buttonLabel,
 	comments,
 	onButtonPress,
 	onCommentPress,
 }) {
+	const [currentImageIndex, setCurrentImageIndex] = useState(0);
+	const [isLiked, setIsLiked] = useState(false);
+	const [currentLikeCount, setCurrentLikeCount] = useState(likes);
+	const [showHeart, setShowHeart] = useState(false);
+
+	const scaleAnim = useRef(new Animated.Value(1)).current;
+	const heartScaleAnim = useRef(new Animated.Value(0)).current;
+	const heartOpacityAnim = useRef(new Animated.Value(1)).current;
+	const lastTap = useRef(null);
+
+	useEffect(() => {
+		console.log("Current Like count:", currentLikeCount);
+	}, [isLiked]);
+
+	useEffect(() => {
+		const fetchIsLiked = async () => {
+			const liked = await fetchUserLikedPostCheck(user.id, id);
+			setIsLiked(liked);
+		};
+
+		fetchIsLiked();
+	}, []);
+
+	const renderPaginationDots = () => (
+		<View style={styles.pagination}>
+			{images.map((_, index) => (
+				<View
+					key={index}
+					style={[
+						styles.dot,
+						index === currentImageIndex
+							? styles.dotActive
+							: styles.dotInactive,
+					]}
+				/>
+			))}
+		</View>
+	);
+
+	const handleDoubleTap = () => {
+		const now = Date.now();
+		if (lastTap.current && now - lastTap.current < 300) {
+			console.log("pressed twice");
+			if (!isLiked) {
+				console.log("yo");
+				handleLikePress();
+				animateHeart();
+			}
+		}
+		lastTap.current = now;
+	};
+
+	const animateHeart = () => {
+		setShowHeart(true);
+		heartScaleAnim.setValue(0);
+		heartOpacityAnim.setValue(1);
+
+		Animated.sequence([
+			Animated.timing(heartScaleAnim, {
+				toValue: 1.5,
+				duration: 200,
+				useNativeDriver: true,
+			}),
+			Animated.timing(heartScaleAnim, {
+				toValue: 1,
+				duration: 200,
+				useNativeDriver: true,
+			}),
+			Animated.timing(heartScaleAnim, {
+				toValue: 1.1,
+				duration: 200,
+				useNativeDriver: true,
+			}),
+			Animated.timing(heartScaleAnim, {
+				toValue: 1.1,
+				duration: 300,
+				useNativeDriver: true,
+			}),
+			Animated.parallel([
+				Animated.timing(heartScaleAnim, {
+					toValue: 0,
+					duration: 200,
+					useNativeDriver: true,
+				}),
+				Animated.timing(heartOpacityAnim, {
+					toValue: 0,
+					duration: 200,
+					useNativeDriver: true,
+				}),
+			]),
+		]).start(() => setShowHeart(false));
+	};
+
+	const handleLikePress = () => {
+		if (!showHeart) {
+			if (isLiked) {
+				setCurrentLikeCount(currentLikeCount - 1);
+				setIsLiked(false);
+				removeLike(user.id, id);
+			} else {
+				setCurrentLikeCount(currentLikeCount + 1);
+				setIsLiked(true);
+				addLike(user.id, id);
+
+				Animated.sequence([
+					Animated.timing(scaleAnim, {
+						toValue: 1.2,
+						duration: 150,
+						useNativeDriver: true,
+					}),
+					Animated.timing(scaleAnim, {
+						toValue: 0.8,
+						duration: 150,
+						useNativeDriver: true,
+					}),
+					Animated.timing(scaleAnim, {
+						toValue: 1.1,
+						duration: 150,
+						useNativeDriver: true,
+					}),
+					Animated.timing(scaleAnim, {
+						toValue: 1,
+						duration: 150,
+						useNativeDriver: true,
+					}),
+				]).start();
+			}
+		}
+	};
+
 	return (
 		<View style={styles.postCard}>
 			{/* Header Section */}
 			<View style={[styles.content, styles.contentLayout]}>
-				<View style={[styles.avatarBlock, styles.socialFlexBox]}>
-					{/* Avatar */}
-					<Image
-						style={styles.avatarIcon}
-						resizeMode="cover"
-						source={{ uri: avatar }}
-					/>
+				<View style={styles.avatarBlock}>
+					{avatar ? (
+						<Image
+							style={styles.avatarIcon}
+							resizeMode="cover"
+							source={{ uri: avatar }}
+						/>
+					) : (
+						<Feather
+							name="user"
+							size={sizes.icon.small}
+							color={colors.icon.default.default()}
+						/>
+					)}
+
 					<View style={styles.info}>
-						<Text style={[styles.name, styles.nameFlexBox]}>
-							{name}
-						</Text>
+						<Text style={styles.name}>{name}</Text>
 						<Text style={styles.description}>{time}</Text>
 					</View>
 				</View>
-				<Feather name="more-horizontal" size={24} color="black" />
+				<Feather
+					name="more-horizontal"
+					size={sizes.icon.small}
+					color={colors.icon.default.default()}
+				/>
 			</View>
 
-			<Image
-				style={styles.unsplashImage}
-				resizeMode="cover"
-				source={{ uri: image }}
-			/>
+			{/* Image Carousel */}
+			<View style={styles.carouselContainer}>
+				<FlatList
+					data={images}
+					horizontal
+					pagingEnabled
+					showsHorizontalScrollIndicator={false}
+					onScroll={(e) => {
+						const newIndex = Math.round(
+							e.nativeEvent.contentOffset.x / wp(100)
+						);
+						setCurrentImageIndex(newIndex);
+					}}
+					keyExtractor={(item, index) => index.toString()}
+					renderItem={({ item }) => (
+						<TouchableWithoutFeedback onPress={handleDoubleTap}>
+							<View style={styles.imageContainer}>
+								<Image
+									source={{ uri: item }}
+									style={styles.carouselImage}
+								/>
+								{showHeart && (
+									<Animated.Image
+										source={require("../../../assets/images/heart.png")}
+										style={[
+											styles.heartIcon,
+											{
+												transform: [
+													{ scale: heartScaleAnim },
+												],
+											},
+										]}
+									/>
+								)}
+							</View>
+						</TouchableWithoutFeedback>
+					)}
+				/>
+			</View>
 
 			{/* Footer Section */}
 			<View style={styles.contentLayout}>
 				<View style={[styles.top, styles.topFlexBox]}>
-					{/* Social Icons */}
-					<View style={[styles.social, styles.socialFlexBox]}>
-						<Feather name="heart" size={24} color="black" />
+					<View style={styles.social}>
+						{isLiked ? (
+							<AntDesign
+								name="heart"
+								size={24}
+								color={colors.icon.warning.secondary()}
+								onPress={handleLikePress}
+							/>
+						) : (
+							<AntDesign
+								name="hearto"
+								size={24}
+								color="black"
+								onPress={handleLikePress}
+							/>
+						)}
+
 						<Feather
 							name="message-circle"
 							size={24}
-							color="black"
+							color={colors.icon.default.default()}
 						/>
-						<Feather name="share-2" size={24} color="black" />
+						<Feather
+							name="share-2"
+							size={24}
+							color={colors.icon.default.default()}
+						/>
 					</View>
 
-					{/* Pagination Dots */}
-					<View style={styles.pagination}>
-						<View style={[styles.dot, styles.dotActive]} />
-						<View style={[styles.dot, styles.dotInactive]} />
-						<View style={[styles.dot, styles.dotInactive]} />
-					</View>
+					{renderPaginationDots()}
 
-					{/* Try It Button */}
 					<Button
 						variant="primary"
 						state="default"
@@ -74,25 +277,20 @@ export default function PostCard({
 					/>
 				</View>
 
-				{/* Likes */}
 				<View style={styles.mid}>
 					<Text style={styles.likes}>Liked by {likes}</Text>
 				</View>
 
-				{/* Caption */}
 				<View style={styles.mid}>
-					<Text style={styles.captionContainer}>
-						<Text style={styles.captionText}>{caption}</Text>
-						<Text
-							style={[styles.more, styles.nameTypo]}
-							onPress={onCommentPress}
-						>
-							more
-						</Text>
+					<Text style={styles.captionText}>{caption}</Text>
+					<Text
+						style={[styles.more, styles.nameTypo]}
+						onPress={onCommentPress}
+					>
+						more
 					</Text>
 				</View>
 
-				{/* View Comments */}
 				<View style={styles.link}>
 					<Text style={styles.comments} onPress={onCommentPress}>
 						View all comments
@@ -112,7 +310,7 @@ const styles = StyleSheet.create({
 	postCard: {
 		height: sizes.space[463],
 		maxWidth: sizes.space[744],
-		width: "100%",
+		width: wp(100),
 		flex: 1,
 	},
 	content: {
@@ -126,7 +324,7 @@ const styles = StyleSheet.create({
 		paddingVertical: sizes.space[4],
 		gap: sizes.space[12],
 		maxWidth: sizes.space[744],
-		width: "100%",
+		width: wp(100),
 	},
 	avatarBlock: {
 		gap: sizes.space[8],
@@ -144,8 +342,8 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	name: {
-		fontSize: typography.primitives.scale[16],
-		fontWeight: typography.primitives.weight.bold,
+		fontSize: typography.styles.heading.sizes.base(),
+		fontWeight: typography.styles.heading.fontWeight(),
 		color: colors.text.default.default(),
 	},
 	description: {
@@ -155,6 +353,16 @@ const styles = StyleSheet.create({
 	unsplashImage: {
 		width: wp(100),
 		height: wp(90),
+	},
+	carouselContainer: {
+		width: wp(100),
+		height: wp(75),
+		position: "relative",
+	},
+	carouselImage: {
+		width: wp(100),
+		height: wp(75),
+		// resizeMode: "cover",
 	},
 	top: {
 		alignItems: "center",
@@ -180,12 +388,17 @@ const styles = StyleSheet.create({
 	},
 	pagination: {
 		flexDirection: "row",
-		gap: sizes.space[8],
+		justifyContent: "center",
+		alignItems: "center", // Center dots vertically
+		position: "absolute", // Positioning relative to parent container
+		bottom: sizes.space[16], // Move dots to the bottom of the carousel
+		width: wp(100), // Ensure it spans the carousel width
 	},
 	dot: {
 		width: sizes.space[8],
 		height: sizes.space[8],
 		borderRadius: sizes.radius.circle,
+		marginHorizontal: sizes.space[4], // Add spacing between dots
 	},
 	dotActive: {
 		backgroundColor: colors.background.brand.active(),
@@ -202,9 +415,6 @@ const styles = StyleSheet.create({
 		fontSize: typography.styles.body.sizes.xsmall(),
 		color: colors.text.default.default(),
 	},
-	captionContainer: {
-		flex: 1,
-	},
 	captionText: {
 		fontSize: typography.styles.body.sizes.base(),
 		color: colors.text.default.default(),
@@ -220,5 +430,17 @@ const styles = StyleSheet.create({
 	comments: {
 		color: colors.text.brand.default(),
 		fontWeight: typography.primitives.weight.bold,
+	},
+	imageContainer: {
+		position: "relative",
+		justifyContent: "center",
+		alignItems: "center",
+		marginVertical: 2,
+	},
+	heartIcon: {
+		position: "absolute",
+		width: 120,
+		height: 110,
+		opacity: 0.7,
 	},
 });
