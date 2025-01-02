@@ -110,6 +110,7 @@ const styles = StyleSheet.create({
 	},
 	mainContent: {
 		alignItems: "flex-end",
+        width: '100%',
 		gap: sizes.space[16],
 	},
 	checkBox: {

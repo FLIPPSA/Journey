@@ -119,11 +119,14 @@ export const fetchAllTasksets = async () => {
 
 export const fetchPosts = async ({ belongingDomain } = {}) => {
 	try {
-		const { data: posts, error } = await supabase.from("posts").select(`
-				*,
-				user:users!posts_userId_fkey (username, profilePicture),
-				likes:likes!likes_postId_fkey (userId)
-			`);
+        const { data: posts, error } = await supabase
+        .from("posts")
+        .select(`
+            *,
+            user:users!posts_userId_fkey (username, profilePicture),
+            likes:likes!likes_postId_fkey (userId)
+        `)
+        .is("likes.commentId", null);  // Use `.is` to check for NULL values
 
 		if (error) {
 			throw new Error(error.message);
@@ -145,6 +148,7 @@ export const fetchPosts = async ({ belongingDomain } = {}) => {
 		throw error;
 	}
 };
+
 
 export async function handlePostUpload(
 	navigation,
@@ -252,7 +256,8 @@ export const removeLike = async (userId, postId) => {
 	const { data, error } = await supabase
 		.from("likes")
 		.delete()
-		.match({ userId, postId });
+		.match({ userId, postId }) // Match userId and postId
+		.is('commentId', null); // Ensure commentId is NULL
 
 	if (error) {
 		throw new Error(error.message);
@@ -261,12 +266,220 @@ export const removeLike = async (userId, postId) => {
 	return data;
 };
 
+
 export const fetchUserLikedPostCheck = async (userId, postId) => {
 	const { data: likes, error } = await supabase
 		.from("likes")
 		.select("postId")
 		.eq("userId", userId)
-		.eq("postId", postId);
+		.eq("postId", postId)
+        .is("commentId", null);  // Use `.is` to check for NULL values
+
+	if (error) {
+		throw new Error(error.message);
+	}
+
+	return likes.length > 0;
+};
+
+export const animateHeart = (
+	Animated,
+	heartScaleAnim,
+	heartOpacityAnim,
+	setShowHeart
+) => {
+	setShowHeart(true);
+	heartScaleAnim.setValue(0);
+	heartOpacityAnim.setValue(1);
+
+	Animated.sequence([
+		Animated.timing(heartScaleAnim, {
+			toValue: 1.5,
+			duration: 200,
+			useNativeDriver: true,
+		}),
+		Animated.timing(heartScaleAnim, {
+			toValue: 1,
+			duration: 200,
+			useNativeDriver: true,
+		}),
+		Animated.timing(heartScaleAnim, {
+			toValue: 1.1,
+			duration: 200,
+			useNativeDriver: true,
+		}),
+		Animated.timing(heartScaleAnim, {
+			toValue: 1.1,
+			duration: 300,
+			useNativeDriver: true,
+		}),
+		Animated.parallel([
+			Animated.timing(heartScaleAnim, {
+				toValue: 0,
+				duration: 200,
+				useNativeDriver: true,
+			}),
+			Animated.timing(heartOpacityAnim, {
+				toValue: 0,
+				duration: 200,
+				useNativeDriver: true,
+			}),
+		]),
+	]).start(() => setShowHeart(false));
+};
+
+export const openCommentSection = (setVisible, Animated, slideAnim, Easing) => {
+	setVisible(true);
+	Animated.timing(slideAnim, {
+		toValue: 1,
+		duration: 300,
+		easing: Easing.out(Easing.ease),
+		useNativeDriver: true,
+	}).start();
+};
+
+export const closeCommentSection = (
+	setVisible,
+	Animated,
+	slideAnim,
+	Easing
+) => {
+	Animated.timing(slideAnim, {
+		toValue: 0,
+		duration: 300,
+		easing: Easing.in(Easing.ease),
+		useNativeDriver: true,
+	}).start(() => setVisible(false));
+};
+
+export async function postComment(
+	content,
+	userId,
+	postId,
+	parentCommentId = null
+) {
+	if (!content) {
+		return { error: "Content is required!" };
+	}
+
+	try {
+		const { data, error } = await supabase.from("comments").insert([
+			{
+				content,
+				userId,
+				postId,
+				parentCommentId,
+			},
+		]);
+
+		if (error) {
+			console.error("Error posting comment:", error);
+			return { error };
+		}
+
+		return { data };
+	} catch (err) {
+		console.error("Unexpected error posting comment:", err);
+		return { error: err.message };
+	}
+}
+
+export async function fetchComments(userId, postId) {
+	if (!postId) {
+		return { error: "Post ID is required!" };
+	}
+
+	try {
+		const { data, error } = await supabase
+			.from("comments")
+			.select(
+				`
+                    id,
+                    content,
+                    userId,
+                    parentCommentId,
+                    createdAt,
+                    users (username, profilePicture),
+                    likes:likes!likes_commentId_fkey (userId)
+                `
+			)
+			.eq("postId", postId)
+            .not('likes.commentId', 'is', null)
+			.order("parentCommentId", { ascending: true }) // Ensures threaded replies are grouped
+			.order("createdAt", { ascending: true }); // Orders comments by time
+
+		if (error) {
+			console.error("Error fetching comments:", error);
+			return { error };
+		}
+
+		// Format the time for each comment like in the fetchPosts function and count likes for comments
+		const formattedComments = await Promise.all(
+			data.map(async (comment) => ({
+				...comment,
+				liked: await fetchUserLikedCommentCheck(userId, postId, comment.id),
+				time: formatTime(comment.createdAt), // Format the createdAt time
+				name: comment.users?.username, // Add username
+				avatar: comment.users?.profilePicture, // Add profile picture
+				likeCount: comment.likes?.length || 0, // Count the number of likes for each comment
+			}))
+		);
+
+		// Group replies under their parent comments
+		const groupedComments = formattedComments.reduce((acc, comment) => {
+			if (!comment.parentCommentId) {
+				acc.push({ ...comment, replies: [] });
+			} else {
+				const parentIndex = acc.findIndex(
+					(c) => c.id === comment.parentCommentId
+				);
+				if (parentIndex !== -1) {
+					acc[parentIndex].replies.push(comment);
+				}
+			}
+			return acc;
+		}, []);
+
+		return groupedComments;
+	} catch (err) {
+		console.error("Unexpected error fetching comments:", err);
+		return { error: err.message };
+	}
+}
+
+export const addCommentLike = async (userId, postId, commentId) => {
+	const { error } = await supabase
+		.from("likes")
+		.insert([{ userId, postId, commentId }]);
+	if (error) {
+        console.log('error:', error);
+		throw new Error(error.message);
+	}
+    console.log('Comment liked')
+	return true;
+};
+
+export const removeCommentLike = async (userId, postId, commentId) => {
+	const { data, error } = await supabase
+		.from("likes")
+		.delete()
+		.match({ userId, postId, commentId });
+
+	if (error) {
+        console.log('error:', error);
+		throw new Error(error.message);
+	}
+    console.log('Comment disliked')
+	return data;
+};
+
+export const fetchUserLikedCommentCheck = async (userId, postId, commentId) => {
+	const { data: likes, error } = await supabase
+		.from("likes")
+		.select("postId")
+		.eq("userId", userId)
+		.eq("postId", postId)
+		.eq("commentId", commentId);
 
 	if (error) {
 		throw new Error(error.message);

@@ -1,7 +1,9 @@
 import {
 	Animated,
+	Easing,
 	FlatList,
 	Image,
+	Modal,
 	StyleSheet,
 	Text,
 	TouchableWithoutFeedback,
@@ -16,9 +18,13 @@ import {
 	removeLike,
 	addLike,
 	fetchUserLikedPostCheck,
+	animateHeart,
+	openCommentSection,
+	closeCommentSection,
 } from "../../utils/common";
 import { useEffect, useRef, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
+import Commenting from "../../pages/Homepage/Commenting";
 
 export default function PostCard({
 	user,
@@ -38,15 +44,13 @@ export default function PostCard({
 	const [isLiked, setIsLiked] = useState(false);
 	const [currentLikeCount, setCurrentLikeCount] = useState(likes);
 	const [showHeart, setShowHeart] = useState(false);
+	const [commentSectionVisible, setCommentSectionVisible] = useState(false);
+	const slideAnim = useRef(new Animated.Value(0)).current;
 
 	const scaleAnim = useRef(new Animated.Value(1)).current;
 	const heartScaleAnim = useRef(new Animated.Value(0)).current;
 	const heartOpacityAnim = useRef(new Animated.Value(1)).current;
 	const lastTap = useRef(null);
-
-	useEffect(() => {
-		console.log("Current Like count:", currentLikeCount);
-	}, [isLiked]);
 
 	useEffect(() => {
 		const fetchIsLiked = async () => {
@@ -76,55 +80,17 @@ export default function PostCard({
 	const handleDoubleTap = () => {
 		const now = Date.now();
 		if (lastTap.current && now - lastTap.current < 300) {
-			console.log("pressed twice");
 			if (!isLiked) {
-				console.log("yo");
 				handleLikePress();
-				animateHeart();
+				animateHeart(
+					Animated,
+					heartScaleAnim,
+					heartOpacityAnim,
+					setShowHeart
+				);
 			}
 		}
 		lastTap.current = now;
-	};
-
-	const animateHeart = () => {
-		setShowHeart(true);
-		heartScaleAnim.setValue(0);
-		heartOpacityAnim.setValue(1);
-
-		Animated.sequence([
-			Animated.timing(heartScaleAnim, {
-				toValue: 1.5,
-				duration: 200,
-				useNativeDriver: true,
-			}),
-			Animated.timing(heartScaleAnim, {
-				toValue: 1,
-				duration: 200,
-				useNativeDriver: true,
-			}),
-			Animated.timing(heartScaleAnim, {
-				toValue: 1.1,
-				duration: 200,
-				useNativeDriver: true,
-			}),
-			Animated.timing(heartScaleAnim, {
-				toValue: 1.1,
-				duration: 300,
-				useNativeDriver: true,
-			}),
-			Animated.parallel([
-				Animated.timing(heartScaleAnim, {
-					toValue: 0,
-					duration: 200,
-					useNativeDriver: true,
-				}),
-				Animated.timing(heartOpacityAnim, {
-					toValue: 0,
-					duration: 200,
-					useNativeDriver: true,
-				}),
-			]),
-		]).start(() => setShowHeart(false));
 	};
 
 	const handleLikePress = () => {
@@ -163,6 +129,11 @@ export default function PostCard({
 			}
 		}
 	};
+
+	const translateY = slideAnim.interpolate({
+		inputRange: [0, 1],
+		outputRange: [800, 0], // Adjust based on your screen height
+	});
 
 	return (
 		<View style={styles.postCard}>
@@ -259,7 +230,42 @@ export default function PostCard({
 							name="message-circle"
 							size={24}
 							color={colors.icon.default.default()}
+							onPress={() =>
+								openCommentSection(
+									setCommentSectionVisible,
+									Animated,
+									slideAnim,
+									Easing
+								)
+							}
 						/>
+						<Modal
+							transparent
+							visible={commentSectionVisible}
+							animationType="none"
+							onRequestClose={() =>
+								closeCommentSection(
+									setCommentSectionVisible,
+									Animated,
+									slideAnim,
+									Easing
+								)
+							}
+						>
+							<TouchableWithoutFeedback
+								onPress={closeCommentSection}
+							>
+								<View style={styles.overlay} />
+							</TouchableWithoutFeedback>
+							<Animated.View
+								style={[
+									styles.modalContent,
+									{ transform: [{ translateY }] },
+								]}
+							>
+								<Commenting user={user} postId={id}/>
+							</Animated.View>
+						</Modal>
 						<Feather
 							name="share-2"
 							size={24}
@@ -442,5 +448,20 @@ const styles = StyleSheet.create({
 		width: 120,
 		height: 110,
 		opacity: 0.7,
+	},
+	overlay: {
+		flex: 1,
+		backgroundColor: "rgba(0,0,0,0.5)",
+	},
+	modalContent: {
+		position: "absolute",
+		bottom: 0,
+		left: 0,
+		right: 0,
+		height: "70%", // Adjust as needed
+		backgroundColor: "white",
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
+		overflow: "hidden",
 	},
 });

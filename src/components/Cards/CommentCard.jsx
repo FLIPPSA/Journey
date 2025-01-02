@@ -1,14 +1,69 @@
-import * as React from "react";
-import { Image, StyleSheet, Text, View, ImageBackground } from "react-native";
+import {
+	Image,
+	StyleSheet,
+	Text,
+	View,
+	ImageBackground,
+	Animated,
+} from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 import Feather from "@expo/vector-icons/Feather";
+import { addCommentLike, removeCommentLike } from "../../utils/common";
+import { useState } from "react";
+import { AntDesign } from "@expo/vector-icons";
 
 export default function CommentCard({
+    id,
 	name = "Name",
 	comment = "Wow. What a nice picture, cool",
 	replies = [],
+	avatar = "https://wallpaperswide.com/download/beautiful_girl_face_aesthetic-wallpaper-1280x720.jpg",
+	time = "A long time ago",
+	likeCount = 0,
 	showReplies = false,
+    liked = false,
+	postId,
+	userId,
 }) {
+	const [isLiked, setIsLiked] = useState(liked);
+	const [currentLikeCount, setCurrentLikeCount] = useState(likeCount);
+
+	const handleLikePress = () => {
+		if (isLiked) {
+			setCurrentLikeCount(currentLikeCount - 1);
+			setIsLiked(false);
+			removeCommentLike(userId, postId, id);
+		} else {
+			setCurrentLikeCount(currentLikeCount + 1);
+			setIsLiked(true);
+			addCommentLike(userId, postId, id);
+
+			// Animated.sequence([
+			//     Animated.timing(scaleAnim, {
+			//         toValue: 1.2,
+			//         duration: 150,
+			//         useNativeDriver: true,
+			//     }),
+			//     Animated.timing(scaleAnim, {
+			//         toValue: 0.8,
+			//         duration: 150,
+			//         useNativeDriver: true,
+			//     }),
+			//     Animated.timing(scaleAnim, {
+			//         toValue: 1.1,
+			//         duration: 150,
+			//         useNativeDriver: true,
+			//     }),
+			//     Animated.timing(scaleAnim, {
+			//         toValue: 1,
+			//         duration: 150,
+			//         useNativeDriver: true,
+			//     }),
+			// ]).start();
+		}
+        
+	};
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.left}>
@@ -16,14 +71,14 @@ export default function CommentCard({
 					style={styles.imgIcon}
 					resizeMode="cover"
 					source={{
-						uri: "https://wallpaperswide.com/download/beautiful_girl_face_aesthetic-wallpaper-1280x720.jpg",
+						uri: avatar,
 					}}
 				/>
 
 				<View style={styles.commentSection}>
 					<View style={styles.commentHeader}>
 						<Text style={styles.name}>{name}</Text>
-						<Text style={styles.time}>23 min ago</Text>
+						<Text style={styles.time}>{time}</Text>
 					</View>
 
 					<Text style={styles.comment}>{comment}</Text>
@@ -65,8 +120,22 @@ export default function CommentCard({
 			</View>
 
 			<View style={styles.likes}>
-				<Feather name="heart" size={24} color="black" />
-				<Text style={styles.likeCount}>91</Text>
+				{isLiked ? (
+					<AntDesign
+						name="heart"
+						size={24}
+						color={colors.icon.warning.secondary()}
+						onPress={handleLikePress}
+					/>
+				) : (
+					<AntDesign
+						name="hearto"
+						size={24}
+						color="black"
+						onPress={handleLikePress}
+					/>
+				)}
+				<Text style={styles.likeCount}>{currentLikeCount}</Text>
 			</View>
 		</View>
 	);
@@ -124,7 +193,7 @@ const styles = StyleSheet.create({
 	replyText: {
 		color: colors.text.default.default(),
 		fontSize: typography.styles.body.sizes.xsmall(),
-        fontWeight: typography.styles.body.fontWeights.bold(),
+		fontWeight: typography.styles.body.fontWeights.bold(),
 	},
 	actions: {
 		flexDirection: "row",

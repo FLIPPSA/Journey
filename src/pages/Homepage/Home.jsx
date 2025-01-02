@@ -12,7 +12,6 @@ export default function Home() {
 	useEffect(() => {
 		async function fetchData() {
 			const fetchedPosts = await fetchPosts();
-            console.log('Posts:', fetchedPosts)
 			setPosts(fetchedPosts);
 		}
 		fetchData();

@@ -15,6 +15,7 @@ export default function InputField({
 	leftIcon = null,
 	rightIcon = null,
 	placeholder = "Type here...",
+    rightOnPress = () => {},
 }) {
 	const [isFocused, setIsFocused] = useState(false); // Track focus state
 
@@ -54,7 +55,7 @@ export default function InputField({
 					onBlur={() => setIsFocused(false)}
 				/>
 				{rightIcon && (
-					<Feather name={rightIcon} size={24} color={colors.icon.default.default()} />
+					<Feather name={rightIcon} size={sizes.icon.small} color={colors.icon.default.default()} onPress={rightOnPress}/>
 				)}
 			</View>
 			{hasError && (
@@ -79,11 +80,12 @@ const styles = StyleSheet.create({
 		alignSelf: "stretch",
 	},
 	inputContainer: {
+        // flex: 1,
 		gap: sizes.space[8],
 		padding: sizes.space[12],
 		backgroundColor: colors.background.default.default(),
 		alignItems: "center",
-        justifyContent: 'space-between',
+        // justifyContent: 'space-between',
 		alignSelf: "stretch",
         flexDirection: 'row',
 		borderRadius: sizes.radius[8],
@@ -95,9 +97,9 @@ const styles = StyleSheet.create({
 		fontFamily: typography.styles.body.fontFamily(),
 		fontWeight: typography.styles.body.fontWeights.regular(),
 		textAlign: "left",
-        // flex: 1, // Let it expand in height
-        minHeight: 20, // Set a minimum height for the input
-        maxHeight: 200, // Define the maximum height for controlled growth
+        flex: 1,
+        // minHeight: 20, // Set a minimum height for the input
+        // maxHeight: 200, // Define the maximum height for controlled growth
 	},
 	errorText: {
 		color: colors.text.danger.default(),
@@ -106,9 +108,7 @@ const styles = StyleSheet.create({
 		textAlign: "left",
 	},
 	inputField: {
-		width: "100%",
 		gap: sizes.space[2],
-        // flex: 1, // Allow the field to grow dynamically
-
+        width: '100%'
 	},
 });
