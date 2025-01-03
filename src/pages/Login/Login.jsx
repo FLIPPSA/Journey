@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { useContext, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { colors, typography, sizes } from "../../utils/design";
 import Logo from "../../components/Brand/Logo";
 import InputField from "../../components/Inputs/InputField";
@@ -16,6 +16,9 @@ export default function Login({ navigation }) {
 	const [password, setPassword] = useState("");
 	const { setUser } = useContext(UserContext);
 
+	const passwordRef = useRef(null);
+	const emailRef = useRef(null);
+
 	return (
 		<View style={styles.container}>
 			<Logo showText={false} />
@@ -23,25 +26,29 @@ export default function Login({ navigation }) {
 			<Text style={styles.loginText}>Log In</Text>
 
 			<View style={styles.mainContent}>
-				<InputField
-					state="Default"
-					valueType="default"
-					hasLabel={true}
-					label="Email"
-					value={email}
-					onChangeText={setEmail}
-				/>
-
-				<InputField
-					state="default"
-					valueType="default"
-					hasLabel={true}
-					label="Password"
-					rightIcon={"eye-off"}
-					value={password}
-					onChangeText={setPassword}
-				/>
-
+				<View style={styles.inputWrapper}>
+					<InputField
+						ref={emailRef}
+						state="Default"
+						valueType="default"
+						hasLabel={true}
+						label="Email"
+						value={email}
+						onChangeText={setEmail}
+					/>
+				</View>
+				<View style={styles.inputWrapper}>
+					<InputField
+						ref={passwordRef}
+						state="default"
+						valueType="default"
+						hasLabel={true}
+						label="Password"
+						rightIcon={"eye-off"}
+						value={password}
+						onChangeText={setPassword}
+					/>
+				</View>
 				<Link
 					variant="Brand"
 					state="Default"
@@ -110,7 +117,7 @@ const styles = StyleSheet.create({
 	},
 	mainContent: {
 		alignItems: "flex-end",
-        width: '100%',
+		width: "100%",
 		gap: sizes.space[16],
 	},
 	checkBox: {
@@ -138,5 +145,8 @@ const styles = StyleSheet.create({
 	accountContainer: {
 		flexDirection: "row",
 		gap: sizes.space[8],
+	},
+	inputWrapper: {
+		flexDirection: "row",
 	},
 });

@@ -5,28 +5,32 @@ import {
 	View,
 	ImageBackground,
 	Animated,
+	TouchableOpacity,
+	FlatList,
 } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 import Feather from "@expo/vector-icons/Feather";
 import { addCommentLike, removeCommentLike } from "../../utils/common";
 import { useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
+import Link from "../Navigation/Link";
 
 export default function CommentCard({
-    id,
+	id,
 	name = "Name",
 	comment = "Wow. What a nice picture, cool",
 	replies = [],
 	avatar = "https://wallpaperswide.com/download/beautiful_girl_face_aesthetic-wallpaper-1280x720.jpg",
 	time = "A long time ago",
 	likeCount = 0,
-	showReplies = false,
-    liked = false,
+	liked = false,
 	postId,
 	userId,
+	onReply,
 }) {
 	const [isLiked, setIsLiked] = useState(liked);
 	const [currentLikeCount, setCurrentLikeCount] = useState(likeCount);
+	const [showReplies, setShowReplies] = useState(false);
 
 	const handleLikePress = () => {
 		if (isLiked) {
@@ -61,7 +65,6 @@ export default function CommentCard({
 			//     }),
 			// ]).start();
 		}
-        
 	};
 
 	return (
@@ -76,45 +79,67 @@ export default function CommentCard({
 				/>
 
 				<View style={styles.commentSection}>
-					<View style={styles.commentHeader}>
-						<Text style={styles.name}>{name}</Text>
-						<Text style={styles.time}>{time}</Text>
+					<View style={styles.mainContentContainer}>
+						<View style={styles.commentHeader}>
+							<Text style={styles.name}>{name}</Text>
+							<Text style={styles.time}>{time}</Text>
+						</View>
+
+						<Text style={styles.comment}>{comment}</Text>
 					</View>
-
-					<Text style={styles.comment}>{comment}</Text>
-
-					{showReplies &&
-						replies.map((reply, index) => (
-							<View key={index} style={styles.reply}>
-								<Image
-									style={styles.replyAvatar}
-									resizeMode="cover"
-									source={{ uri: "Avatar.png" }}
-								/>
-								<Text style={styles.replyText}>{reply}</Text>
-							</View>
-						))}
+					{showReplies && (
+						<FlatList
+							data={replies}
+							keyExtractor={(item, index) => index.toString()}
+							renderItem={({ item }) => (
+								<View style={styles.replyContainer}>
+									<Image
+										style={styles.replyAvatar}
+										source={{
+											uri:
+												item.avatar ||
+												"https://wallpaperswide.com/download/beautiful_girl_face_aesthetic-wallpaper-1280x720.jpg",
+										}}
+									/>
+									<Text style={styles.replyText}>
+										{item.content}
+									</Text>
+								</View>
+							)}
+							contentContainerStyle={styles.repliesList} // Ensure this is correctly placed
+						/>
+					)}
 
 					<View style={styles.actions}>
-						<View style={styles.action}>
-							<Feather
-								name="chevron-down"
-								size={16}
-								color={colors.icon.default.default()}
+						{replies.length > 0 && (
+							<Link
+								variant="Neutral"
+								state="Default"
+								size="Small"
+								label={
+									showReplies
+										? "Hide Replies"
+										: "Show Replies"
+								}
+								hasIconStart={true}
+								iconStart={
+									showReplies
+										? "chevron-up"
+										: "chevron-down"
+								}
+								onPress={() => setShowReplies(!showReplies)}
 							/>
-							<Text style={styles.actionText}>
-								{showReplies ? "Hide Replies" : "Show Replies"}
-							</Text>
-						</View>
+						)}
 
-						<View style={styles.action}>
-							<Feather
-								name="message-circle"
-								size={24}
-								color={colors.icon.default.default()}
-							/>
-							<Text style={styles.actionText}>Reply</Text>
-						</View>
+						<Link
+							variant="Neutral"
+							state="Default"
+							size="Small"
+							label={"Reply"}
+							hasIconStart={true}
+							iconStart="message-circle"
+							onPress={() => onReply(id)}
+						/>
 					</View>
 				</View>
 			</View>
@@ -145,25 +170,29 @@ const styles = StyleSheet.create({
 	container: {
 		flexDirection: "row",
 		justifyContent: "space-between",
-		gap: sizes.space[6],
 		backgroundColor: colors.background.default.default(),
 	},
 	left: {
 		flexDirection: "row",
+		gap: sizes.space[8],
 		flex: 1,
 	},
 	imgIcon: {
-		width: sizes.icon.medium,
-		height: sizes.icon.medium,
+		width: sizes.icon.xLarge,
+		height: sizes.icon.xLarge,
 		borderRadius: sizes.radius.circle,
 	},
 	commentSection: {
 		flex: 1,
-		marginLeft: sizes.space[8],
+		paddingVertical: sizes.space[4],
+		gap: sizes.space[8],
 	},
 	commentHeader: {
 		flexDirection: "row",
-		justifyContent: "space-between",
+		gap: sizes.space[8],
+	},
+	mainContentContainer: {
+		gap: sizes.space[4],
 	},
 	name: {
 		fontWeight: typography.styles.body.fontWeights.bold(),
@@ -179,16 +208,23 @@ const styles = StyleSheet.create({
 		color: colors.text.default.default(),
 		fontSize: typography.styles.body.sizes.xsmall(),
 	},
-	reply: {
+	repliesList: {
+		gap: sizes.space[16],
+		backgroundColor: "#f9f9f9", // Example background color
+	},
+	replyContainer: {
 		flexDirection: "row",
 		alignItems: "center",
-		marginTop: sizes.space[8],
+		gap: sizes.space[4],
 	},
 	replyAvatar: {
-		width: sizes.icon.small,
-		height: sizes.icon.small,
+		width: 24,
+		height: 24,
 		borderRadius: sizes.radius.circle,
-		marginRight: sizes.space[8],
+	},
+	replyName: {
+		fontWeight: "bold",
+		color: colors.text.default.default(),
 	},
 	replyText: {
 		color: colors.text.default.default(),
@@ -197,27 +233,16 @@ const styles = StyleSheet.create({
 	},
 	actions: {
 		flexDirection: "row",
-		justifyContent: "space-between",
-		marginTop: sizes.space[8],
+		gap: sizes.space[16],
 	},
 	action: {
 		flexDirection: "row",
 		alignItems: "center",
 	},
-	icon: {
-		width: sizes.icon.xxSmall,
-		height: sizes.icon.xxSmall,
-		marginRight: sizes.space[4],
-	},
-	actionText: {
-		color: colors.text.default.default(),
-		fontWeight: typography.styles.body.fontWeights.bold(),
-		fontSize: typography.styles.body.sizes.xsmall(),
-	},
 	likes: {
 		alignItems: "center",
-		justifyContent: "center",
-		width: sizes.space[40],
+		justifyContent: "flex-start",
+		gap: sizes.space[2],
 	},
 	likeIcon: {
 		width: sizes.icon.small,

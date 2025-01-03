@@ -72,6 +72,7 @@ export default function NewPostShare({ route }) {
 						})}
 					</View>
 				</View>
+                <View style={styles.inputWrapper}>
 				<InputField
 					state="default"
 					valueType="default"
@@ -80,6 +81,7 @@ export default function NewPostShare({ route }) {
 					onChangeText={setCaption}
 					placeholder="Type here..."
 				/>
+                </View>
 				<Button
 					variant="primary"
 					state="default"
@@ -136,5 +138,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: sizes.space[16],
     },
-	imageCaptionContainer: {},
+    inputWrapper: {
+		flexDirection: "row",
+	},
 });

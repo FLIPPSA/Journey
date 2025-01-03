@@ -1,69 +1,79 @@
-import React, { useState } from "react";
+import React, { useState, forwardRef } from "react";
 import { Text, StyleSheet, View, TextInput } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
-import Feather from '@expo/vector-icons/Feather';
+import Feather from "@expo/vector-icons/Feather";
 
-export default function InputField({
-	value = "",
-	onChangeText,
-	hasLabel = true,
-	label = "Label:",
-	hasDescription = false,
-	description = "Description",
-	hasError = false,
-	error = "Error",
-	leftIcon = null,
-	rightIcon = null,
-	placeholder = "Type here...",
-    rightOnPress = () => {},
-}) {
-	const [isFocused, setIsFocused] = useState(false); // Track focus state
+const InputField = forwardRef(
+	(
+		{
+			value = "",
+			onChangeText,
+			hasLabel = true,
+			label = "Label:",
+			hasDescription = false,
+			description = "Description",
+			hasError = false,
+			error = "Error",
+			leftIcon = null,
+			rightIcon = null,
+			placeholder = "Type here...",
+			rightOnPress = () => {},
+		},
+		ref
+	) => {
+		const [isFocused, setIsFocused] = useState(false); // Track focus state
 
-	const borderColor = hasError
-		? colors.text.danger.default()
-		: isFocused
-		? colors.background.brand.default()
-		: colors.border.default.secondary();
+		const borderColor = hasError
+			? colors.text.danger.default()
+			: isFocused
+			? colors.background.brand.default()
+			: colors.border.default.secondary();
 
-	return (
-		<View style={styles.inputField}>
-			{hasLabel && (
-				<Text style={styles.labelTypo}>{label}</Text>
-			)}
-			{hasDescription && (
-				<Text style={styles.descriptionTypo}>
-					{description}
-				</Text>
-			)}
-			<View
-				style={[
-					styles.inputContainer,
-					{ borderColor },
-				]}
-			>
-				{leftIcon && (
-					<Feather name={leftIcon} size={24} color={colors.icon.default.default()} />
+		return (
+			<View style={styles.inputField}>
+				{hasLabel && <Text style={styles.labelTypo}>{label}</Text>}
+				{hasDescription && (
+					<Text style={styles.descriptionTypo}>
+						{description}
+					</Text>
 				)}
-				<TextInput
-					style={styles.inputText}
-					placeholder={placeholder}
-					multiline={true}
-					onChangeText={onChangeText}
-					value={value}
-					placeholderTextColor={colors.text.default.secondary()}
-					onFocus={() => setIsFocused(true)}
-					onBlur={() => setIsFocused(false)}
-				/>
-				{rightIcon && (
-					<Feather name={rightIcon} size={sizes.icon.small} color={colors.icon.default.default()} onPress={rightOnPress}/>
+				<View style={[styles.inputContainer, { borderColor }]}>
+					{leftIcon && (
+						<Feather
+							name={leftIcon}
+							size={24}
+							color={colors.icon.default.default()}
+						/>
+					)}
+					<TextInput
+						ref={ref} // Attach the ref to TextInput
+						style={styles.inputText}
+						placeholder={placeholder}
+						multiline={true}
+						onChangeText={onChangeText}
+						value={value}
+						placeholderTextColor={colors.text.default.secondary()}
+						onFocus={() => setIsFocused(true)}
+						onBlur={() => setIsFocused(false)}
+					/>
+					{rightIcon && (
+						<Feather
+							name={rightIcon}
+							size={sizes.icon.small}
+							color={colors.icon.default.default()}
+							onPress={rightOnPress}
+						/>
+					)}
+				</View>
+				{hasError && (
+					<Text style={styles.errorText}>{error}</Text>
 				)}
 			</View>
-			{hasError && (
-				<Text style={styles.errorText}>{error}</Text>
-			)}
-		</View>
-	);
-}
+		);
+	}
+);
+
+export default InputField;
 
 const styles = StyleSheet.create({
 	labelTypo: {
@@ -80,14 +90,13 @@ const styles = StyleSheet.create({
 		alignSelf: "stretch",
 	},
 	inputContainer: {
-        // flex: 1,
 		gap: sizes.space[8],
-		padding: sizes.space[12],
+		paddingHorizontal: sizes.space[12],
+        paddingVertical: sizes.space[8],
 		backgroundColor: colors.background.default.default(),
 		alignItems: "center",
-        // justifyContent: 'space-between',
 		alignSelf: "stretch",
-        flexDirection: 'row',
+		flexDirection: "row",
 		borderRadius: sizes.radius[8],
 		borderWidth: sizes.stroke[1],
 	},
@@ -97,9 +106,7 @@ const styles = StyleSheet.create({
 		fontFamily: typography.styles.body.fontFamily(),
 		fontWeight: typography.styles.body.fontWeights.regular(),
 		textAlign: "left",
-        flex: 1,
-        // minHeight: 20, // Set a minimum height for the input
-        // maxHeight: 200, // Define the maximum height for controlled growth
+		flex: 1,
 	},
 	errorText: {
 		color: colors.text.danger.default(),
@@ -109,6 +116,6 @@ const styles = StyleSheet.create({
 	},
 	inputField: {
 		gap: sizes.space[2],
-        width: '100%'
+		flex: 1,
 	},
 });

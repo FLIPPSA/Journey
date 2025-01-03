@@ -1,4 +1,4 @@
-import { Dimensions, Alert } from "react-native";
+import { Dimensions, Alert, Animated, Easing } from "react-native";
 import { supabase } from "./supabaseConfig";
 import Constants from "expo-constants";
 import "react-native-get-random-values";
@@ -118,35 +118,41 @@ export const fetchAllTasksets = async () => {
 };
 
 export const fetchPosts = async ({ belongingDomain } = {}) => {
-	try {
+    try {
         const { data: posts, error } = await supabase
-        .from("posts")
-        .select(`
-            *,
-            user:users!posts_userId_fkey (username, profilePicture),
-            likes:likes!likes_postId_fkey (userId)
-        `)
-        .is("likes.commentId", null);  // Use `.is` to check for NULL values
+            .from("posts")
+            .select(
+                `
+                    *,
+                    user:users(username, profilePicture),
+                    likes:likes(userId, commentId),
+                    commentCount:comments!left(postId)
+                `
+            );
 
-		if (error) {
-			throw new Error(error.message);
-		}
+        if (error) {
+            throw new Error(error.message);
+        }
 
-		// Flatten the user object and count likes
-		const formattedPosts = posts.map((post) => ({
-			...post,
-			time: formatTime(post.createdAt),
-			name: post.user?.username, // Add `username` directly
-			avatar: post.user?.profilePicture, // Add `profilePicture` directly
-			likeCount: post.likes?.length || 0, // Count the number of likes
-			fileUrls: post.fileUrls ? JSON.parse(post.fileUrls) : [], // Parse the JSON string into an array
-		}));
+        // Format the posts data
+        const formattedPosts = posts.map((post) => {
+            const postLikes = post.likes?.filter((like) => !like.commentId) || []; // Only likes without commentId
+            return {
+                ...post,
+                time: formatTime(post.createdAt),
+                name: post.user?.username, // Add `username` directly
+                avatar: post.user?.profilePicture, // Add `profilePicture` directly
+                likeCount: postLikes.length, // Count only likes for posts
+                commentCount: post.commentCount?.length || 0, // Count the number of comments
+                fileUrls: post.fileUrls ? JSON.parse(post.fileUrls) : [], // Parse the JSON string into an array
+            };
+        });
 
-		return formattedPosts;
-	} catch (error) {
-		console.error("Error fetching posts:", error);
-		throw error;
-	}
+        return formattedPosts;
+    } catch (error) {
+        console.error("Error fetching posts:", error);
+        throw error;
+    }
 };
 
 
@@ -257,7 +263,7 @@ export const removeLike = async (userId, postId) => {
 		.from("likes")
 		.delete()
 		.match({ userId, postId }) // Match userId and postId
-		.is('commentId', null); // Ensure commentId is NULL
+		.is("commentId", null); // Ensure commentId is NULL
 
 	if (error) {
 		throw new Error(error.message);
@@ -266,14 +272,13 @@ export const removeLike = async (userId, postId) => {
 	return data;
 };
 
-
 export const fetchUserLikedPostCheck = async (userId, postId) => {
 	const { data: likes, error } = await supabase
 		.from("likes")
 		.select("postId")
 		.eq("userId", userId)
 		.eq("postId", postId)
-        .is("commentId", null);  // Use `.is` to check for NULL values
+		.is("commentId", null); // Use `.is` to check for NULL values
 
 	if (error) {
 		throw new Error(error.message);
@@ -283,7 +288,6 @@ export const fetchUserLikedPostCheck = async (userId, postId) => {
 };
 
 export const animateHeart = (
-	Animated,
 	heartScaleAnim,
 	heartOpacityAnim,
 	setShowHeart
@@ -328,7 +332,7 @@ export const animateHeart = (
 	]).start(() => setShowHeart(false));
 };
 
-export const openCommentSection = (setVisible, Animated, slideAnim, Easing) => {
+export const openCommentSection = (setVisible, slideAnim) => {
 	setVisible(true);
 	Animated.timing(slideAnim, {
 		toValue: 1,
@@ -338,12 +342,7 @@ export const openCommentSection = (setVisible, Animated, slideAnim, Easing) => {
 	}).start();
 };
 
-export const closeCommentSection = (
-	setVisible,
-	Animated,
-	slideAnim,
-	Easing
-) => {
+export const closeCommentSection = (setVisible, slideAnim) => {
 	Animated.timing(slideAnim, {
 		toValue: 0,
 		duration: 300,
@@ -404,7 +403,7 @@ export async function fetchComments(userId, postId) {
                 `
 			)
 			.eq("postId", postId)
-            .not('likes.commentId', 'is', null)
+			.not("likes.commentId", "is", null)
 			.order("parentCommentId", { ascending: true }) // Ensures threaded replies are grouped
 			.order("createdAt", { ascending: true }); // Orders comments by time
 
@@ -417,28 +416,52 @@ export async function fetchComments(userId, postId) {
 		const formattedComments = await Promise.all(
 			data.map(async (comment) => ({
 				...comment,
-				liked: await fetchUserLikedCommentCheck(userId, postId, comment.id),
+				liked: await fetchUserLikedCommentCheck(
+					userId,
+					postId,
+					comment.id
+				),
 				time: formatTime(comment.createdAt), // Format the createdAt time
 				name: comment.users?.username, // Add username
 				avatar: comment.users?.profilePicture, // Add profile picture
-				likeCount: comment.likes?.length || 0, // Count the number of likes for each comment
 			}))
 		);
 
-		// Group replies under their parent comments
-		const groupedComments = formattedComments.reduce((acc, comment) => {
-			if (!comment.parentCommentId) {
-				acc.push({ ...comment, replies: [] });
-			} else {
-				const parentIndex = acc.findIndex(
-					(c) => c.id === comment.parentCommentId
-				);
-				if (parentIndex !== -1) {
-					acc[parentIndex].replies.push(comment);
+		// Group replies under their parent comments using Map
+		const groupedComments = (() => {
+			const commentMap = new Map();
+
+			// Add all comments to the map, initialize replies as an empty array
+			formattedComments.forEach((comment) => {
+				commentMap.set(comment.id, { ...comment, replies: [] });
+			});
+
+			// Assign replies to their parent comment
+			formattedComments.forEach((comment) => {
+				if (comment.parentCommentId) {
+					const parentComment = commentMap.get(
+						comment.parentCommentId
+					);
+					if (parentComment) {
+						parentComment.replies.push({
+							id: comment.id,
+							content: comment.content,
+							userId: comment.userId,
+							parentCommentId: comment.parentCommentId,
+							name: comment.name,
+							avatar: comment.avatar,
+						});
+					}
 				}
-			}
-			return acc;
-		}, []);
+			});
+
+			// Return only top-level comments (those without a parent)
+			return Array.from(commentMap.values()).filter(
+				(comment) => !comment.parentCommentId
+			);
+		})();
+
+		console.log("Comments:", JSON.stringify(groupedComments, null, 2));
 
 		return groupedComments;
 	} catch (err) {
@@ -452,10 +475,10 @@ export const addCommentLike = async (userId, postId, commentId) => {
 		.from("likes")
 		.insert([{ userId, postId, commentId }]);
 	if (error) {
-        console.log('error:', error);
+		console.log("error:", error);
 		throw new Error(error.message);
 	}
-    console.log('Comment liked')
+	console.log("Comment liked");
 	return true;
 };
 
@@ -466,10 +489,10 @@ export const removeCommentLike = async (userId, postId, commentId) => {
 		.match({ userId, postId, commentId });
 
 	if (error) {
-        console.log('error:', error);
+		console.log("error:", error);
 		throw new Error(error.message);
 	}
-    console.log('Comment disliked')
+	console.log("Comment disliked");
 	return data;
 };
 

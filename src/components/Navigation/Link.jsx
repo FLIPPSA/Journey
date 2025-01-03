@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
+import { Feather } from "@expo/vector-icons";
 
 export default function Link({
 	variant = "Neutral",
@@ -8,7 +9,7 @@ export default function Link({
 	size = "Medium",
 	label = "Link",
 	hasIconStart = false,
-	iconStart = "Star.png",
+    iconStart="",
 	hasIconEnd = false,
 	iconEnd = "X.png",
     onPress = () => {}
@@ -31,11 +32,7 @@ export default function Link({
 	return (
 		<TouchableOpacity style={styles.linkContainer} onPress={onPress}>
 			{hasIconStart && (
-				<Image
-					style={styles.icon}
-					resizeMode="cover"
-					source={{ uri: iconStart }}
-				/>
+				<Feather name={iconStart} size={sizes.space[16]} color={colors.icon.default.default()} />
 			)}
 			<Text
 				style={[
@@ -47,11 +44,7 @@ export default function Link({
 				{label}
 			</Text>
 			{hasIconEnd && (
-				<Image
-					style={styles.icon}
-					resizeMode="cover"
-					source={{ uri: iconEnd }}
-				/>
+				<Feather name={iconEnd} size={sizes.space[16]} color={colors.icon.default.default()} />
 			)}
 		</TouchableOpacity>
 	);

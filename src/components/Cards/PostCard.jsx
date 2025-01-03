@@ -1,6 +1,5 @@
 import {
 	Animated,
-	Easing,
 	FlatList,
 	Image,
 	Modal,
@@ -8,6 +7,8 @@ import {
 	Text,
 	TouchableWithoutFeedback,
 	View,
+	PanResponder,
+	BackHandler,
 } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 import { colors, typography, sizes } from "../../utils/design";
@@ -25,6 +26,8 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import Commenting from "../../pages/Homepage/Commenting";
+import Link from "../Navigation/Link";
+import { TouchableOpacity } from "react-native";
 
 export default function PostCard({
 	user,
@@ -35,6 +38,7 @@ export default function PostCard({
 	images = [], // Default to an empty array
 	avatar = "https://wallpapercave.com/wp/wp8781456.jpg",
 	likes = 0,
+	commentCount = 0,
 	buttonLabel,
 	comments,
 	onButtonPress,
@@ -42,15 +46,52 @@ export default function PostCard({
 }) {
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [isLiked, setIsLiked] = useState(false);
+	const [captionIsExpanded, setCaptionIsExpanded] = useState(false);
+
 	const [currentLikeCount, setCurrentLikeCount] = useState(likes);
 	const [showHeart, setShowHeart] = useState(false);
 	const [commentSectionVisible, setCommentSectionVisible] = useState(false);
-	const slideAnim = useRef(new Animated.Value(0)).current;
-
-	const scaleAnim = useRef(new Animated.Value(1)).current;
+	const [sheetHeight, setSheetHeight] = useState(hp(100)); // Dynamic sheet height
+	const slideAnim = useRef(new Animated.Value(hp(100))).current; // Modal position
+	const overlayOpacity = useRef(new Animated.Value(0)).current; // Overlay opacity
 	const heartScaleAnim = useRef(new Animated.Value(0)).current;
 	const heartOpacityAnim = useRef(new Animated.Value(1)).current;
 	const lastTap = useRef(null);
+
+	const handleCaptionToggle = () => {
+		setCaptionIsExpanded((prev) => !prev);
+	};
+
+	const openCommentSection = () => {
+		setCommentSectionVisible(true);
+		Animated.parallel([
+			Animated.timing(slideAnim, {
+				toValue: hp(0),
+				duration: 300,
+				useNativeDriver: true,
+			}),
+			Animated.timing(overlayOpacity, {
+				toValue: 1, // Fade in overlay
+				duration: 300,
+				useNativeDriver: true,
+			}),
+		]).start();
+	};
+
+	const closeCommentSection = () => {
+		Animated.parallel([
+			Animated.timing(slideAnim, {
+				toValue: hp(100),
+				duration: 300,
+				useNativeDriver: true,
+			}),
+			Animated.timing(overlayOpacity, {
+				toValue: 0,
+				duration: 300,
+				useNativeDriver: true,
+			}),
+		]).start(() => setCommentSectionVisible(false)); // Set visibility to false after animation
+	};
 
 	useEffect(() => {
 		const fetchIsLiked = async () => {
@@ -61,33 +102,29 @@ export default function PostCard({
 		fetchIsLiked();
 	}, []);
 
-	const renderPaginationDots = () => (
-		<View style={styles.pagination}>
-			{images.map((_, index) => (
-				<View
-					key={index}
-					style={[
-						styles.dot,
-						index === currentImageIndex
-							? styles.dotActive
-							: styles.dotInactive,
-					]}
-				/>
-			))}
-		</View>
-	);
+	const renderPaginationDots = () =>
+		images.length > 1 ? (
+			<View style={styles.pagination}>
+				{images.map((_, index) => (
+					<View
+						key={index}
+						style={[
+							styles.dot,
+							index === currentImageIndex
+								? styles.dotActive
+								: styles.dotInactive,
+						]}
+					/>
+				))}
+			</View>
+		) : null;
 
 	const handleDoubleTap = () => {
 		const now = Date.now();
 		if (lastTap.current && now - lastTap.current < 300) {
 			if (!isLiked) {
 				handleLikePress();
-				animateHeart(
-					Animated,
-					heartScaleAnim,
-					heartOpacityAnim,
-					setShowHeart
-				);
+				animateHeart(heartScaleAnim, heartOpacityAnim, setShowHeart);
 			}
 		}
 		lastTap.current = now;
@@ -129,11 +166,6 @@ export default function PostCard({
 			}
 		}
 	};
-
-	const translateY = slideAnim.interpolate({
-		inputRange: [0, 1],
-		outputRange: [800, 0], // Adjust based on your screen height
-	});
 
 	return (
 		<View style={styles.postCard}>
@@ -208,64 +240,66 @@ export default function PostCard({
 
 			{/* Footer Section */}
 			<View style={styles.contentLayout}>
-				<View style={[styles.top, styles.topFlexBox]}>
+				<View style={styles.top}>
 					<View style={styles.social}>
 						{isLiked ? (
-							<AntDesign
-								name="heart"
-								size={24}
-								color={colors.icon.warning.secondary()}
-								onPress={handleLikePress}
-							/>
+							<View style={styles.socialCountContainer}>
+								<AntDesign
+									name="heart"
+									size={24}
+									color={colors.icon.warning.secondary()}
+									onPress={handleLikePress}
+								/>
+								<Text>{currentLikeCount}</Text>
+							</View>
 						) : (
-							<AntDesign
-								name="hearto"
-								size={24}
-								color="black"
-								onPress={handleLikePress}
-							/>
+							<View style={styles.socialCountContainer}>
+								<AntDesign
+									name="hearto"
+									size={24}
+									color="black"
+									onPress={handleLikePress}
+								/>
+								<Text>{currentLikeCount}</Text>
+							</View>
 						)}
-
-						<Feather
-							name="message-circle"
-							size={24}
-							color={colors.icon.default.default()}
-							onPress={() =>
-								openCommentSection(
-									setCommentSectionVisible,
-									Animated,
-									slideAnim,
-									Easing
-								)
-							}
-						/>
+						<View style={styles.socialCountContainer}>
+							<Feather
+								name="message-circle"
+								size={24}
+								color={colors.icon.default.default()}
+								onPress={openCommentSection} // Open comment section on message button click
+							/>
+							<Text>{commentCount}</Text>
+						</View>
 						<Modal
 							transparent
 							visible={commentSectionVisible}
 							animationType="none"
-							onRequestClose={() =>
-								closeCommentSection(
-									setCommentSectionVisible,
-									Animated,
-									slideAnim,
-									Easing
-								)
-							}
 						>
-							<TouchableWithoutFeedback
-								onPress={closeCommentSection}
-							>
-								<View style={styles.overlay} />
-							</TouchableWithoutFeedback>
+							{/* Overlay */}
+							<Animated.View
+								style={[
+									styles.overlay,
+									{ opacity: overlayOpacity },
+								]}
+							/>
+
+							{/* Animated Commenting Section */}
 							<Animated.View
 								style={[
 									styles.modalContent,
-									{ transform: [{ translateY }] },
+									{ transform: [{ translateY: slideAnim }] },
 								]}
 							>
-								<Commenting user={user} postId={id}/>
+								<Commenting
+									user={user}
+									postId={id}
+									closeSection={closeCommentSection}
+								/>
 							</Animated.View>
 						</Modal>
+
 						<Feather
 							name="share-2"
 							size={24}
@@ -288,25 +322,39 @@ export default function PostCard({
 				</View>
 
 				<View style={styles.mid}>
-					<Text style={styles.captionText}>{caption}</Text>
 					<Text
-						style={[styles.more, styles.nameTypo]}
-						onPress={onCommentPress}
+						style={styles.captionText}
+						numberOfLines={captionIsExpanded ? undefined : 2} // Show full text when expanded
+						ellipsizeMode="tail" // Adds "..." at the end
 					>
-						more
+						{caption}
 					</Text>
+					{!captionIsExpanded &&
+						caption.split(" ").length > 10 && ( // Check if caption is long
+							<TouchableOpacity onPress={handleCaptionToggle}>
+								<Text style={[styles.more, styles.nameTypo]}>
+									more
+								</Text>
+							</TouchableOpacity>
+						)}
+					{captionIsExpanded && (
+						<TouchableOpacity onPress={handleCaptionToggle}>
+							<Text style={[styles.more, styles.nameTypo]}>
+								less
+							</Text>
+						</TouchableOpacity>
+					)}
 				</View>
 
-				<View style={styles.link}>
-					<Text style={styles.comments} onPress={onCommentPress}>
-						View all comments
-					</Text>
-					<Feather
-						name="chevron-right"
-						size={16}
-						color={colors.text.brand.default()}
-					/>
-				</View>
+				<Link
+					variant="Neutral"
+					state="Default"
+					size="Medium"
+					label="View all comments"
+					hasIconEnd={true}
+					iconEnd="chevron-right"
+					onPress={openCommentSection}
+				/>
 			</View>
 		</View>
 	);
@@ -314,7 +362,7 @@ export default function PostCard({
 
 const styles = StyleSheet.create({
 	postCard: {
-		height: sizes.space[463],
+		height: wp(75),
 		maxWidth: sizes.space[744],
 		width: wp(100),
 		flex: 1,
@@ -329,8 +377,8 @@ const styles = StyleSheet.create({
 		paddingHorizontal: sizes.space[8],
 		paddingVertical: sizes.space[4],
 		gap: sizes.space[12],
-		maxWidth: sizes.space[744],
 		width: wp(100),
+		alignItems: "flex-start",
 	},
 	avatarBlock: {
 		gap: sizes.space[8],
@@ -373,6 +421,7 @@ const styles = StyleSheet.create({
 	top: {
 		alignItems: "center",
 		flexDirection: "row",
+		width: "100%",
 		justifyContent: "space-between",
 	},
 	social: {
@@ -428,15 +477,6 @@ const styles = StyleSheet.create({
 	more: {
 		color: colors.text.default.secondary(),
 	},
-	link: {
-		gap: sizes.space[4],
-		flexDirection: "row",
-		alignItems: "center",
-	},
-	comments: {
-		color: colors.text.brand.default(),
-		fontWeight: typography.primitives.weight.bold,
-	},
 	imageContainer: {
 		position: "relative",
 		justifyContent: "center",
@@ -451,17 +491,16 @@ const styles = StyleSheet.create({
 	},
 	overlay: {
 		flex: 1,
-		backgroundColor: "rgba(0,0,0,0.5)",
+		backgroundColor: "rgba(0, 0, 0, 0.5)",
 	},
 	modalContent: {
 		position: "absolute",
 		bottom: 0,
-		left: 0,
-		right: 0,
-		height: "70%", // Adjust as needed
-		backgroundColor: "white",
-		borderTopLeftRadius: 20,
-		borderTopRightRadius: 20,
-		overflow: "hidden",
+		width: "100%",
+		height: hp(100),
+		// backgroundColor: "white",
+	},
+	socialCountContainer: {
+		alignItems: "center",
 	},
 });
