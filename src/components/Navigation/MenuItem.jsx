@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 import Feather from "@expo/vector-icons/Feather";
 
@@ -7,9 +7,10 @@ export default function MenuItem({
 	icon = "user",
 	title = "Account Center",
 	description = "Password, Manage Account",
+    onPress
 }) {
 	return (
-		<View style={styles.container}>
+		<TouchableOpacity style={styles.container} onPress={onPress}>
 			<Feather
 				name={icon}
 				size={24}
@@ -26,7 +27,7 @@ export default function MenuItem({
 				</View>
 				<Text style={styles.description}>{description}</Text>
 			</View>
-		</View>
+		</TouchableOpacity>
 	);
 }
 
@@ -39,7 +40,6 @@ const styles = StyleSheet.create({
 		gap: sizes.space[12],
 		flexDirection: "row",
 		overflow: "hidden",
-		flex: 1,
 	},
 	label: {
 		fontSize: typography.styles.body.sizes.base(),

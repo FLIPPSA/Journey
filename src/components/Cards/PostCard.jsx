@@ -51,7 +51,7 @@ export default function PostCard({
 	const [currentLikeCount, setCurrentLikeCount] = useState(likes);
 	const [showHeart, setShowHeart] = useState(false);
 	const [commentSectionVisible, setCommentSectionVisible] = useState(false);
-	const [sheetHeight, setSheetHeight] = useState(hp(100)); // Dynamic sheet height
+    const scaleAnim = useRef(new Animated.Value(hp(100))).current;
 	const slideAnim = useRef(new Animated.Value(hp(100))).current; // Modal position
 	const overlayOpacity = useRef(new Animated.Value(0)).current; // Overlay opacity
 	const heartScaleAnim = useRef(new Animated.Value(0)).current;

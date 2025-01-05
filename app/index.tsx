@@ -16,6 +16,10 @@ import WelcomeBack from "../src/pages/WelcomeBack/WelcomeBack";
 import NewPostShare from "../src/pages/NewPost/NewPostShare";
 import { GlobalDataProvider } from "../src/utils/globalfetches";
 import { UserProvider } from "../src/utils/authentication";
+import Settings from "../src/pages/Settings/Settings";
+import Account from "../src/pages/Settings/Account";
+import ResetPassword from "../src/pages/Settings/ResetPassword";
+import Support from "../src/pages/Settings/Support";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -98,21 +102,18 @@ export default function App() {
 								headerStyle: { backgroundColor: "red" },
 							}}
 						>
-                            <Stack.Screen name="Login" component={Login} />
-                            <Stack.Screen name="Splash" component={Splash} />
+							<Stack.Screen name="Login" component={Login} />
+							<Stack.Screen name="Splash" component={Splash} />
 							<Stack.Screen name="NavBar" component={NavBar} />
 							<Stack.Screen name="Home" component={Home} />
 							<Tab.Screen name="NewPost" component={NewPost} />
-							<Tab.Screen
-								name="NewPostShare"
-								component={NewPostShare}
-							/>
-							<Stack.Screen
-								name="WelcomeBack"
-								component={WelcomeBack}
-							/>
-                                                        <Stack.Screen name="SignUp" component={SignUp} />
-
+							<Tab.Screen name="NewPostShare" component={NewPostShare} />
+							<Stack.Screen name="WelcomeBack" component={WelcomeBack}/>
+							<Stack.Screen name="SignUp" component={SignUp} />
+                            <Stack.Screen name="Settings" component={Settings} />
+                            <Stack.Screen name="Account" component={Account} />
+                            <Stack.Screen name="ResetPassword" component={ResetPassword} />
+                            <Stack.Screen name="Support" component={Support} />
 						</Stack.Navigator>
 					</SafeAreaView>
 				</GestureHandlerRootView>

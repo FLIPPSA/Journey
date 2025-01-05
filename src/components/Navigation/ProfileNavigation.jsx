@@ -2,6 +2,7 @@ import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 import Feather from "@expo/vector-icons/Feather";
+import { useNavigation } from "expo-router";
 
 export default function ProfileNavigation({
 	showBack = true,
@@ -11,6 +12,7 @@ export default function ProfileNavigation({
 	profileImage = "https://wallpapercave.com/wp/wp8781456.jpg",
 	showMenu = true,
 }) {
+    const navigation = useNavigation()
 	return (
 		<View style={styles.container}>
 			{/* Back Button */}
@@ -43,6 +45,7 @@ export default function ProfileNavigation({
 							name="menu"
 							size={24}
 							color={colors.icon.default.default()}
+                            onPress={()=>{navigation.navigate("Settings")}}
 						/>
 					)}
 				</View>
@@ -94,8 +97,9 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 	},
 	avatarBlockContainer: {
-		gap: sizes.space[4],
 		alignItems: "center",
+        width: "100%",
+        justifyContent: 'space-between',
 		flexDirection: "row",
 	},
 	profileInfo: {
