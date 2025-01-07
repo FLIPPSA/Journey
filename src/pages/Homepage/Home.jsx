@@ -61,7 +61,7 @@ export default function Home() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1, // Ensures the container occupies full height
-		backgroundColor: "white", // Optional background
+		// backgroundColor: "white", // Optional background
 	},
 	flatlistContent: {
         gap: 200,

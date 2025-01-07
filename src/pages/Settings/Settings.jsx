@@ -23,7 +23,7 @@ export default function Settings({ navigation }) {
 						icon="user"
 						title="Account"
 						description="Username, Email"
-                        onPress={() => navigation.navigate("Account", {user})}
+                        onPress={() => navigation.navigate("Account", {user, navigation})}
 					/>
 					<MenuItem
 						icon="key"

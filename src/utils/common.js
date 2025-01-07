@@ -118,43 +118,41 @@ export const fetchAllTasksets = async () => {
 };
 
 export const fetchPosts = async ({ belongingDomain } = {}) => {
-    try {
-        const { data: posts, error } = await supabase
-            .from("posts")
-            .select(
-                `
+	try {
+		const { data: posts, error } = await supabase.from("posts").select(
+			`
                     *,
                     user:users(username, profilePicture),
                     likes:likes(userId, commentId),
                     commentCount:comments!left(postId)
                 `
-            );
+		);
 
-        if (error) {
-            throw new Error(error.message);
-        }
+		if (error) {
+			throw new Error(error.message);
+		}
 
-        // Format the posts data
-        const formattedPosts = posts.map((post) => {
-            const postLikes = post.likes?.filter((like) => !like.commentId) || []; // Only likes without commentId
-            return {
-                ...post,
-                time: formatTime(post.createdAt),
-                name: post.user?.username, // Add `username` directly
-                avatar: post.user?.profilePicture, // Add `profilePicture` directly
-                likeCount: postLikes.length, // Count only likes for posts
-                commentCount: post.commentCount?.length || 0, // Count the number of comments
-                fileUrls: post.fileUrls ? JSON.parse(post.fileUrls) : [], // Parse the JSON string into an array
-            };
-        });
+		// Format the posts data
+		const formattedPosts = posts.map((post) => {
+			const postLikes =
+				post.likes?.filter((like) => !like.commentId) || []; // Only likes without commentId
+			return {
+				...post,
+				time: formatTime(post.createdAt),
+				name: post.user?.username, // Add `username` directly
+				avatar: post.user?.profilePicture, // Add `profilePicture` directly
+				likeCount: postLikes.length, // Count only likes for posts
+				commentCount: post.commentCount?.length || 0, // Count the number of comments
+				fileUrls: post.fileUrls ? JSON.parse(post.fileUrls) : [], // Parse the JSON string into an array
+			};
+		});
 
-        return formattedPosts;
-    } catch (error) {
-        console.error("Error fetching posts:", error);
-        throw error;
-    }
+		return formattedPosts;
+	} catch (error) {
+		console.error("Error fetching posts:", error);
+		throw error;
+	}
 };
-
 
 export async function handlePostUpload(
 	navigation,
@@ -509,4 +507,109 @@ export const fetchUserLikedCommentCheck = async (userId, postId, commentId) => {
 	}
 
 	return likes.length > 0;
+};
+
+export const fetchUserPosts = async (userId) => {
+	try {
+		const { data, error } = await supabase
+			.from("posts")
+			.select("id, fileUrls")
+			.eq("userId", userId);
+
+		if (error) {
+			throw new Error(error.message);
+		}
+
+		// Parse the fileUrls JSON strings into arrays
+		const formattedData = data.map((post) => ({
+			...post,
+			fileUrls: post.fileUrls ? JSON.parse(post.fileUrls) : [], // Parse or fallback to an empty array
+		}));
+
+		return formattedData; // Array of posts with parsed fileUrls
+	} catch (error) {
+		console.error("Error fetching user posts:", error.message);
+		throw error;
+	}
+};
+
+export const fetchUserPostsBefore = async (userId, postId, limit = 10) => {
+	try {
+		const { data: post } = await supabase
+			.from("posts")
+			.select("createdAt")
+			.eq("id", postId)
+			.single();
+
+		const { data, error } = await supabase
+			.from("posts")
+			.select(
+                `
+                *,
+                user:users(username, profilePicture),
+                likes:likes(userId, commentId),
+                commentCount:comments!left(postId)
+            `
+            )
+			.eq("userId", userId)
+			.lt("createdAt", post.createdAt) // Posts before the given post
+			.order("createdAt", { ascending: false }) // Most recent first
+			.limit(limit);
+
+		if (error) throw error;
+		return data.map((post) => ({
+			...post,
+			fileUrls: post.fileUrls ? JSON.parse(post.fileUrls) : [],
+		}));
+	} catch (error) {
+		console.error("Error fetching earlier posts:", error);
+		return [];
+	}
+};
+
+export const fetchUserPostsAfter = async (userId, postId, limit = 10) => {
+    console.log('drin');
+	try {
+		const { data: post } = await supabase
+			.from("posts")
+			.select("createdAt")
+			.eq("id", postId)
+			.single();
+
+		const { data, error } = await supabase
+			.from("posts")
+			.select(
+                `
+                *,
+                user:users(username, profilePicture),
+                likes:likes(userId, commentId),
+                commentCount:comments!left(postId)
+            `
+            )
+			.eq("userId", userId)
+			.gt("createdAt", post.createdAt) // Posts after the given post
+			.order("createdAt", { ascending: true }) // Oldest first
+			.limit(limit);
+
+
+        // Format the posts data
+		const formattedPosts = data.map((post) => {
+			const postLikes =
+				post.likes?.filter((like) => !like.commentId) || []; // Only likes without commentId
+			return {
+				...post,
+				time: formatTime(post.createdAt),
+				name: post.user?.username, // Add `username` directly
+				avatar: post.user?.profilePicture, // Add `profilePicture` directly
+				likeCount: postLikes.length, // Count only likes for posts
+				commentCount: post.commentCount?.length || 0, // Count the number of comments
+				fileUrls: post.fileUrls ? JSON.parse(post.fileUrls) : [], // Parse the JSON string into an array
+			};
+		});
+
+		return formattedPosts;
+	} catch (error) {
+		console.error("Error fetching later posts:", error);
+		return [];
+	}
 };

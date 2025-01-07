@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 import { Feather } from "@expo/vector-icons";
 
@@ -12,12 +12,14 @@ export default function AvatarBlock({
 	showXIcon = false,
 	icon = "Check",
 	avatarUri,
+    onPress
 }) {
 	const isHorizontal = layout === "horizontal";
 
 	return (
-		<View
+		<TouchableOpacity
 			style={styles.container}
+            onPress={onPress}
 		>
 			<View style={styles.avatarContainer}>
 				{/* Render Avatar or Placeholder */}
@@ -79,7 +81,7 @@ export default function AvatarBlock({
 					<Text style={styles.description}>{description}</Text>
 				)}
 			</View>
-		</View>
+		</TouchableOpacity>
 	);
 }
 

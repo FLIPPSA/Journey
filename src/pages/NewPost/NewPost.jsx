@@ -18,20 +18,42 @@ export default function NewPost({ navigation }) {
 	const [galleryImages, setGalleryImages] = useState([]);
 	const [selectedImages, setSelectedImages] = useState([]);
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
+	const [loading, setLoading] = useState(false);
+	const [hasNextPage, setHasNextPage] = useState(true);
+	const [endCursor, setEndCursor] = useState(null);
 
-	// Load images from the gallery
+	// Request media library permissions and fetch initial batch
 	useEffect(() => {
 		(async () => {
 			const { status } = await MediaLibrary.requestPermissionsAsync();
 			if (status === "granted") {
-				const media = await MediaLibrary.getAssetsAsync({
-					mediaType: "photo",
-					first: 50,
-				});
-				setGalleryImages(media.assets);
+				fetchImages();
 			}
 		})();
 	}, []);
+
+	// Fetch images with pagination
+	const fetchImages = async () => {
+		if (loading || !hasNextPage) return; // Prevent duplicate fetches
+		setLoading(true);
+
+		try {
+			const media = await MediaLibrary.getAssetsAsync({
+				mediaType: "photo",
+				first: 50,
+				after: endCursor, // Start after the last fetched item
+				sortBy: [MediaLibrary.SortBy.creationTime],
+			});
+
+			setGalleryImages((prev) => [...prev, ...media.assets]); // Append new images
+			setHasNextPage(media.hasNextPage); // Update if more images are available
+			setEndCursor(media.endCursor); // Update cursor for next fetch
+		} catch (error) {
+			console.error("Error fetching images:", error);
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	// Toggle image selection
 	const toggleImageSelection = (uri) => {
@@ -147,6 +169,13 @@ export default function NewPost({ navigation }) {
 					keyExtractor={(item) => item.id}
 					renderItem={renderImageItem}
 					numColumns={3}
+					onEndReached={fetchImages} // Fetch more images when reaching the end
+					onEndReachedThreshold={0.5} // Trigger fetch when 50% from the bottom
+					ListFooterComponent={
+						loading && (
+							<Text style={styles.loadingText}>Loading...</Text>
+						)
+					}
 				/>
 			</View>
 		</View>

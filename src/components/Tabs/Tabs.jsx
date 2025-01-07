@@ -1,20 +1,55 @@
-import * as React from "react";
+import React from "react";
 import { StyleSheet, View } from "react-native";
 import Tab from "./Tab";
 
 export default function Tabs({
+	label1 = "Tab",
 	showTab2 = true,
+	label2 = "Tab",
 	showTab3 = true,
+	label3 = "Tab",
 	showTab4 = true,
+	label4 = "Tab",
 	showTab5 = true,
+	label5 = "Tab",
+	activeTab,
+	setActiveTab,
 }) {
 	return (
 		<View style={styles.container}>
-			<Tab />
-			{showTab2 && <Tab />}
-			{showTab3 && <Tab />}
-			{showTab4 && <Tab />}
-			{showTab5 && <Tab />}
+			<Tab
+				label={label1}
+				active={activeTab === label1}
+				onPress={() => setActiveTab(label1)}
+			/>
+			{showTab2 && (
+				<Tab
+					label={label2}
+					active={activeTab === label2}
+					onPress={() => setActiveTab(label2)}
+				/>
+			)}
+			{showTab3 && (
+				<Tab
+					label={label3}
+					active={activeTab === label3}
+					onPress={() => setActiveTab(label3)}
+				/>
+			)}
+			{showTab4 && (
+				<Tab
+					label={label4}
+					active={activeTab === label4}
+					onPress={() => setActiveTab(label4)}
+				/>
+			)}
+			{showTab5 && (
+				<Tab
+					label={label5}
+					active={activeTab === label5}
+					onPress={() => setActiveTab(label5)}
+				/>
+			)}
 		</View>
 	);
 }

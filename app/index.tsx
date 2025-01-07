@@ -20,6 +20,8 @@ import Settings from "../src/pages/Settings/Settings";
 import Account from "../src/pages/Settings/Account";
 import ResetPassword from "../src/pages/Settings/ResetPassword";
 import Support from "../src/pages/Settings/Support";
+import CameraScreen from "../src/pages/NewPost/CameraScreen";
+import PostDetails from "../src/pages/Profile/PostDetails";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -114,6 +116,9 @@ export default function App() {
                             <Stack.Screen name="Account" component={Account} />
                             <Stack.Screen name="ResetPassword" component={ResetPassword} />
                             <Stack.Screen name="Support" component={Support} />
+                            <Stack.Screen name="CameraScreen" component={CameraScreen} />
+                            <Stack.Screen name="PostDetails" component={PostDetails} />
+
 						</Stack.Navigator>
 					</SafeAreaView>
 				</GestureHandlerRootView>
