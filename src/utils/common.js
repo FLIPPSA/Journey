@@ -52,8 +52,8 @@ export const handleSignUp = async (
 			Alert.alert("Profile Error", insertError.message);
 			return;
 		}
-		Alert.alert("Success", "Account created successfully!");
-		setUser({ id: data.user.id, firstName });
+		const userObj = await fetchUser(data.user.id);
+		setUser(userObj);
 		navigation.navigate("NavBar");
 	}
 };
@@ -544,13 +544,13 @@ export const fetchUserPostsBefore = async (userId, postId, limit = 10) => {
 		const { data, error } = await supabase
 			.from("posts")
 			.select(
-                `
+				`
                 *,
                 user:users(username, profilePicture),
                 likes:likes(userId, commentId),
                 commentCount:comments!left(postId)
             `
-            )
+			)
 			.eq("userId", userId)
 			.lt("createdAt", post.createdAt) // Posts before the given post
 			.order("createdAt", { ascending: false }) // Most recent first
@@ -568,7 +568,6 @@ export const fetchUserPostsBefore = async (userId, postId, limit = 10) => {
 };
 
 export const fetchUserPostsAfter = async (userId, postId, limit = 10) => {
-    console.log('drin');
 	try {
 		const { data: post } = await supabase
 			.from("posts")
@@ -579,20 +578,19 @@ export const fetchUserPostsAfter = async (userId, postId, limit = 10) => {
 		const { data, error } = await supabase
 			.from("posts")
 			.select(
-                `
+				`
                 *,
                 user:users(username, profilePicture),
                 likes:likes(userId, commentId),
                 commentCount:comments!left(postId)
             `
-            )
+			)
 			.eq("userId", userId)
 			.gt("createdAt", post.createdAt) // Posts after the given post
 			.order("createdAt", { ascending: true }) // Oldest first
 			.limit(limit);
 
-
-        // Format the posts data
+		// Format the posts data
 		const formattedPosts = data.map((post) => {
 			const postLikes =
 				post.likes?.filter((like) => !like.commentId) || []; // Only likes without commentId
@@ -611,5 +609,212 @@ export const fetchUserPostsAfter = async (userId, postId, limit = 10) => {
 	} catch (error) {
 		console.error("Error fetching later posts:", error);
 		return [];
+	}
+};
+
+export const addFriend = async (senderId, receiverId) => {
+	try {
+		// Validate inputs
+		if (!senderId || !receiverId) {
+			throw new Error("Both senderId and receiverId are required.");
+		}
+
+		// Insert relationship into the "relationships" table
+		const { data, error } = await supabase
+			.from("relationships")
+			.insert([{ senderId, receiverId, status: false }]);
+
+		if (error) {
+			throw new Error(error.message);
+		}
+
+		return data; // Successfully added relationship
+	} catch (error) {
+		console.error("Error adding friend:", error.message);
+		throw error;
+	}
+};
+
+export const fetchFriends = async (userId) => {
+	try {
+		// Validate input
+		if (!userId) {
+			throw new Error("User ID is required.");
+		}
+
+		// Fetch relationships where the user is either the sender or receiver, and the status is true (accepted)
+		const { data, error } = await supabase
+			.from("relationships")
+			.select(
+				`
+                id,
+                senderId,
+                receiverId,
+                sender:users!relationships_senderId_fkey(id, username, profilePicture),
+                receiver:users!relationships_receiverId_fkey(id, username, profilePicture)
+            `
+			)
+			.or(`senderId.eq.${userId},receiverId.eq.${userId}`)
+			.eq("status", true);
+
+		if (error) {
+			throw new Error(error.message);
+		}
+
+		// Extract and normalize friend data
+		const friends = data.map((relation) => {
+			if (relation.senderId === userId) {
+				return relation.receiver; // Friend is the receiver
+			} else {
+				return relation.sender; // Friend is the sender
+			}
+		});
+
+		return friends; // Array of friend objects with id, username, and profilePicture
+	} catch (error) {
+		console.error("Error fetching friends:", error.message);
+		throw error;
+	}
+};
+
+export const fetchPendingFriendRequests = async (userId) => {
+	try {
+		// Validate input
+		if (!userId) {
+			throw new Error("User ID is required.");
+		}
+
+		// Fetch relationships where the user is the receiver and status is false (pending)
+		const { data, error } = await supabase
+			.from("relationships")
+			.select(
+				`
+                senderId,
+                sender:users!relationships_senderId_fkey(id, username, profilePicture)
+            `
+			)
+			.eq("receiverId", userId)
+			.eq("status", false);
+
+		if (error) {
+			throw new Error(error.message);
+		}
+
+		// Extract and normalize pending request data
+		const pendingRequests = data.map((relation) => ({
+			id: relation.sender.id,
+			username: relation.sender.username,
+			profilePicture: relation.sender.profilePicture,
+		}));
+
+		return pendingRequests; // Array of pending request objects with id, username, and profilePicture
+	} catch (error) {
+		console.error("Error fetching pending friend requests:", error.message);
+		throw error;
+	}
+};
+
+export const fetchDiscoverUsers = async (
+	userId,
+	searchQuery = "",
+	page = 1,
+	limit = 50
+) => {
+	try {
+		// Validate input
+		if (!userId) {
+			throw new Error("User ID is required.");
+		}
+
+		// Calculate offset for pagination
+		const offset = (page - 1) * limit;
+
+		// Fetch all relationships where the user is either the sender or receiver
+		const { data: relationshipsData, error: relationshipsError } =
+			await supabase
+				.from("relationships")
+				.select("senderId, receiverId")
+				.or(`senderId.eq.${userId},receiverId.eq.${userId}`);
+
+		if (relationshipsError) {
+			throw new Error(relationshipsError.message);
+		}
+
+		// Extract IDs of all related users (friends or pending requests)
+		const relatedUserIds = new Set(
+			relationshipsData.flatMap((relation) =>
+				relation.senderId === userId
+					? relation.receiverId
+					: relation.senderId
+			)
+		);
+
+		// Fetch users excluding related users and the current user
+		const { data: users, error: usersError } = await supabase
+			.from("users")
+			.select("id, username, profilePicture")
+			.not("id", "in", `(${[...relatedUserIds].join(",")})`) // Exclude related users
+			.neq("id", userId) // Exclude the current user
+			.ilike("username", `%${searchQuery}%`) // Filter by search query (case-insensitive)
+			.range(offset, offset + limit - 1); // Pagination
+
+		if (usersError) {
+			throw new Error(usersError.message);
+		}
+
+		return users; // Return the list of users for discovery
+	} catch (error) {
+		console.error("Error fetching discover users:", error.message);
+		throw error;
+	}
+};
+
+export const approveFriendRequest = async (senderId, receiverId) => {
+	try {
+		// Validate input
+		if (!senderId || !receiverId) {
+			throw new Error("Both senderId and receiverId are required.");
+		}
+
+		// Update the relationship status to true (approved)
+		const { data, error } = await supabase
+			.from("relationships")
+			.update({ status: true })
+			.eq("senderId", senderId)
+			.eq("receiverId", receiverId);
+
+		if (error) {
+			throw new Error(error.message);
+		}
+
+		return data; // Return the updated row
+	} catch (error) {
+		console.error("Error approving friend request:", error.message);
+		throw error;
+	}
+};
+
+export const denyFriendRequest = async (senderId, receiverId) => {
+	try {
+		// Validate input
+		if (!senderId || !receiverId) {
+			throw new Error("Both senderId and receiverId are required.");
+		}
+
+		// Delete the relationship row
+		const { data, error } = await supabase
+			.from("relationships")
+			.delete()
+			.eq("senderId", senderId)
+			.eq("receiverId", receiverId);
+
+		if (error) {
+			throw new Error(error.message);
+		}
+
+		return data; // Return the deleted row(s)
+	} catch (error) {
+		console.error("Error denying friend request:", error.message);
+		throw error;
 	}
 };

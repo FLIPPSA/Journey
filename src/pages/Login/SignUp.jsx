@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { useContext, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { colors, typography, sizes } from "../../utils/design";
 import Logo from "../../components/Brand/Logo";
 import InputField from "../../components/Inputs/InputField";
@@ -28,37 +28,40 @@ export default function SignUp({ navigation }) {
 			<Text style={styles.signUpText}>Sign Up</Text>
 
 			<View style={styles.mainContent}>
-				<InputField
-					ref={fullNameRef}
-					state="Default"
-					valueType="default"
-					hasLabel={true}
-					label="Full Name"
-					value={username}
-					onChangeText={setUsername}
-				/>
-
-				<InputField
-					ref={emailRef}
-					state="Default"
-					valueType="default"
-					hasLabel={true}
-					label="Email"
-					value={email}
-					onChangeText={setEmail}
-				/>
-
-				<InputField
-					ref={passwordRef}
-					state="default"
-					valueType="default"
-					hasLabel={true}
-					label="Password"
-					rightIcon={"eye-off"}
-					value={password}
-					onChangeText={setPassword}
-				/>
-
+				<View style={styles.inputWrapper}>
+					<InputField
+						ref={fullNameRef}
+						state="Default"
+						valueType="default"
+						hasLabel={true}
+						label="Full Name"
+						value={username}
+						onChangeText={setUsername}
+					/>
+				</View>
+				<View style={styles.inputWrapper}>
+					<InputField
+						ref={emailRef}
+						state="Default"
+						valueType="default"
+						hasLabel={true}
+						label="Email"
+						value={email}
+						onChangeText={setEmail}
+					/>
+				</View>
+				<View style={styles.inputWrapper}>
+					<InputField
+						ref={passwordRef}
+						state="default"
+						valueType="default"
+						hasLabel={true}
+						label="Password"
+						rightIcon={"eye-off"}
+						value={password}
+						onChangeText={setPassword}
+					/>
+				</View>
 				<Link
 					variant="Brand"
 					state="Default"
@@ -76,21 +79,23 @@ export default function SignUp({ navigation }) {
 				</View>
 			</View>
 
-			<Button
-				variant="primary"
-				state="default"
-				size="medium"
-				label="SignUp"
-				onPress={async () =>
-					await handleSignUp(
-						navigation,
-						setUser,
-						email,
-						password,
-						username
-					)
-				}
-			/>
+			<View style={styles.buttonWrapper}>
+				<Button
+					variant="primary"
+					state="default"
+					size="medium"
+					label="SignUp"
+					onPress={async () =>
+						await handleSignUp(
+							navigation,
+							setUser,
+							email,
+							password,
+							username
+						)
+					}
+				/>
+			</View>
 
 			<View style={styles.socialContainer}>
 				<View style={styles.continueWith}>
@@ -159,5 +164,11 @@ const styles = StyleSheet.create({
 	accountContainer: {
 		flexDirection: "row",
 		gap: sizes.space[8],
+	},
+	inputWrapper: {
+		flexDirection: "row",
+	},
+    buttonWrapper: {
+		flexDirection: "row",
 	},
 });

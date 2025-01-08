@@ -9,10 +9,10 @@ export default function ProfileNavigation({
 	backLabel = "Back",
 	showProfile = true,
 	profileName = "Jenni So",
-	profileImage = "https://wallpapercave.com/wp/wp8781456.jpg",
+	profileImage,
 	showMenu = true,
 }) {
-    const navigation = useNavigation()
+	const navigation = useNavigation();
 	return (
 		<View style={styles.container}>
 			{/* Back Button */}
@@ -31,11 +31,31 @@ export default function ProfileNavigation({
 			{showProfile && (
 				<View style={styles.avatarBlockContainer}>
 					<View style={styles.profileInfo}>
-						<Image
-							style={styles.profileImage}
-							resizeMode="cover"
-							source={{ uri: profileImage }}
-						/>
+						{profileImage ? (
+							<Image
+								style={styles.profileImage}
+								resizeMode="cover"
+								source={{ uri: profileImage }}
+							/>
+						) : (
+							<View
+								style={[
+									styles.profileImage,
+									{
+										justifyContent: "center",
+										alignItems: "center",
+										backgroundColor: colors.background.default.secondary(),
+									},
+								]}
+							>
+								<Feather
+									name="user"
+									size={sizes.icon.small}
+									color={colors.icon.default.default()}
+								/>
+							</View>
+						)}
+
 						<Text style={styles.name}>{profileName}</Text>
 					</View>
 
@@ -45,7 +65,9 @@ export default function ProfileNavigation({
 							name="menu"
 							size={24}
 							color={colors.icon.default.default()}
-                            onPress={()=>{navigation.navigate("Settings")}}
+							onPress={() => {
+								navigation.navigate("Settings");
+							}}
 						/>
 					)}
 				</View>
@@ -98,8 +120,8 @@ const styles = StyleSheet.create({
 	},
 	avatarBlockContainer: {
 		alignItems: "center",
-        width: "100%",
-        justifyContent: 'space-between',
+		width: "100%",
+		justifyContent: "space-between",
 		flexDirection: "row",
 	},
 	profileInfo: {

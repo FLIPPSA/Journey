@@ -22,6 +22,7 @@ import ResetPassword from "../src/pages/Settings/ResetPassword";
 import Support from "../src/pages/Settings/Support";
 import CameraScreen from "../src/pages/NewPost/CameraScreen";
 import PostDetails from "../src/pages/Profile/PostDetails";
+import { colors } from "../src/utils/design";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -89,7 +90,8 @@ function NavBar() {
 
 export default function App() {
 	useEffect(() => {
-		StatusBar.setBarStyle("light-content");
+		StatusBar.setBackgroundColor(colors.background.default.default());
+		StatusBar.setBarStyle("dark-content");
 	}, []);
 
 	return (
@@ -109,16 +111,33 @@ export default function App() {
 							<Stack.Screen name="NavBar" component={NavBar} />
 							<Stack.Screen name="Home" component={Home} />
 							<Tab.Screen name="NewPost" component={NewPost} />
-							<Tab.Screen name="NewPostShare" component={NewPostShare} />
-							<Stack.Screen name="WelcomeBack" component={WelcomeBack}/>
+							<Tab.Screen
+								name="NewPostShare"
+								component={NewPostShare}
+							/>
+							<Stack.Screen
+								name="WelcomeBack"
+								component={WelcomeBack}
+							/>
 							<Stack.Screen name="SignUp" component={SignUp} />
-                            <Stack.Screen name="Settings" component={Settings} />
-                            <Stack.Screen name="Account" component={Account} />
-                            <Stack.Screen name="ResetPassword" component={ResetPassword} />
-                            <Stack.Screen name="Support" component={Support} />
-                            <Stack.Screen name="CameraScreen" component={CameraScreen} />
-                            <Stack.Screen name="PostDetails" component={PostDetails} />
-
+							<Stack.Screen
+								name="Settings"
+								component={Settings}
+							/>
+							<Stack.Screen name="Account" component={Account} />
+							<Stack.Screen
+								name="ResetPassword"
+								component={ResetPassword}
+							/>
+							<Stack.Screen name="Support" component={Support} />
+							<Stack.Screen
+								name="CameraScreen"
+								component={CameraScreen}
+							/>
+							<Stack.Screen
+								name="PostDetails"
+								component={PostDetails}
+							/>
 						</Stack.Navigator>
 					</SafeAreaView>
 				</GestureHandlerRootView>

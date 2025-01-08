@@ -1,9 +1,9 @@
 import * as React from "react";
-import { Text, StyleSheet, Image, View } from "react-native";
+import { TextInput, StyleSheet, View } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 import Feather from "@expo/vector-icons/Feather";
 
-export default function Search({ state = "Default", text = "Search" }) {
+export default function Search({ state = "Default", text = "Search", onSearch }) {
 	const getStylesByState = (state) => {
 		switch (state) {
 			case "Default":
@@ -19,7 +19,12 @@ export default function Search({ state = "Default", text = "Search" }) {
 
 	return (
 		<View style={[styles.stateactiveLayout, getStylesByState(state)]}>
-			<Text style={styles.searchText}>{text}</Text>
+			<TextInput
+				style={styles.searchText}
+				placeholder={text}
+				placeholderTextColor={colors.text.default.secondary()}
+				onChangeText={onSearch}
+			/>
 			<Feather
 				name="search"
 				size={20}
@@ -44,7 +49,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 	},
 	searchText: {
-		color: colors.text.default.secondary(),
+		color: colors.text.default.default(),
 		textAlign: "left",
 		flex: 1,
 		fontFamily: typography.styles.body.fontFamily(),

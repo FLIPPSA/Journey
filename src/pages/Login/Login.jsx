@@ -66,15 +66,17 @@ export default function Login({ navigation }) {
 				</View>
 			</View>
 
-			<Button
-				variant="primary"
-				state="default"
-				size="medium"
-				label="Log In"
-				onPress={async () =>
-					await handleLogIn(navigation, setUser, email, password)
-				}
-			/>
+			<View style={styles.buttonWrapper}>
+				<Button
+					variant="primary"
+					state="default"
+					size="medium"
+					label="Log In"
+					onPress={async () =>
+						await handleLogIn(navigation, setUser, email, password)
+					}
+				/>
+			</View>
 
 			<View style={styles.socialContainer}>
 				<View style={styles.continueWith}>
@@ -147,6 +149,9 @@ const styles = StyleSheet.create({
 		gap: sizes.space[8],
 	},
 	inputWrapper: {
+		flexDirection: "row",
+	},
+	buttonWrapper: {
 		flexDirection: "row",
 	},
 });

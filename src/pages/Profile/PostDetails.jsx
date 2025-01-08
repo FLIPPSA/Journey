@@ -14,12 +14,9 @@ export default function PostDetails({ route }) {
 	const { postId, user } = route.params;
 
 	useEffect(() => {
-		console.log("hallo");
 		async function fetchInitialPosts() {
-			console.log("außerhalb", user, postId);
 			const initialPosts = await fetchUserPostsAfter(user.id, postId, 10);
 			setPosts(initialPosts);
-			console.log("initialPosts:", initialPosts);
 		}
 		fetchInitialPosts();
 	}, [postId]);

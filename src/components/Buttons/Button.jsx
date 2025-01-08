@@ -1,5 +1,11 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
+import {
+	StyleSheet,
+	ActivityIndicator,
+	Text,
+	TouchableOpacity,
+	View,
+} from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 import Feather from "@expo/vector-icons/Feather";
 
@@ -10,8 +16,8 @@ export default function Button({
 	label = "Button",
 	leftIcon = null,
 	rightIcon = null,
-    isLoading = false,
-    onPress = () => {}
+	isLoading = false,
+	onPress = () => {},
 }) {
 	const buttonStyles = [
 		styles.buttonBase,
@@ -26,35 +32,52 @@ export default function Button({
 		state === "active" && styles[`${variant}TextActive`],
 	];
 
+	const renderContent = () => {
+		if (isLoading) {
+			return (
+				<ActivityIndicator
+					size="small"
+					color={variant === "tertiary" ? "#82581C" : "#FFFFFF"}
+				/>
+			);
+		}
+
+		return (
+			<>
+				{leftIcon && (
+					<Feather
+						name={leftIcon}
+						size={24}
+						style={styles[`${variant}Text`]}
+					/>
+				)}
+				<Text style={textStyles}>{label}</Text>
+				{rightIcon && (
+					<Feather
+						name={rightIcon}
+						size={24}
+						style={styles[`${variant}Text`]}
+					/>
+				)}
+			</>
+		);
+	};
+
 	return (
 		<TouchableOpacity style={buttonStyles} onPress={onPress}>
-			{leftIcon && (
-				<Feather
-					name={leftIcon}
-					size={24}
-                    style={styles[`${variant}Text`]}
-				/>
-			)}
-			<Text style={textStyles}>{label}</Text>
-			{rightIcon && (
-				<Feather
-					name={rightIcon}
-					size={24}
-					style={styles[`${variant}Text`]}
-				/>
-			)}
+			{renderContent()}
 		</TouchableOpacity>
 	);
 }
 
 const styles = StyleSheet.create({
 	buttonBase: {
+		flex: 1,
 		flexDirection: "row",
-        // width: '100%',
 		alignItems: "center",
 		justifyContent: "center",
 		gap: sizes.space[8],
-		padding: sizes.space[12],
+		height: sizes.space[40],
 		borderRadius: sizes.radius[8],
 	},
 	textBase: {
@@ -66,7 +89,7 @@ const styles = StyleSheet.create({
 	primaryButton: {
 		backgroundColor: colors.background.brand.default(),
 		borderColor: colors.border.brand.default(),
-        borderWidth: sizes.stroke[1],
+		borderWidth: sizes.stroke[1],
 	},
 	primaryButtonActive: {
 		backgroundColor: colors.background.brand.active(),
@@ -81,7 +104,7 @@ const styles = StyleSheet.create({
 	secondaryButton: {
 		backgroundColor: colors.background.brand.tertiary(),
 		borderColor: colors.border.brand.secondary(),
-        borderWidth: sizes.stroke[1],
+		borderWidth: sizes.stroke[1],
 	},
 	secondaryButtonActive: {
 		backgroundColor: colors.background.brand.tertiary(),
@@ -92,16 +115,6 @@ const styles = StyleSheet.create({
 	},
 	secondaryTextActive: {
 		color: colors.text.default.default(),
-	},
-	neutralButtonActive: {
-		borderColor: colors.border.default.tertiary(),
-		borderWidth: sizes.stroke[1],
-	},
-	neutralText: {
-		color: colors.text.default.default(),
-	},
-	neutralTextActive: {
-		color: colors.text.default.inverse(),
 	},
 	tertiaryButtonActive: {
 		borderColor: colors.border.brand.secondary(),

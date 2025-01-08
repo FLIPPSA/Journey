@@ -1,7 +1,6 @@
 import {
 	Image,
 	StyleSheet,
-	Platform,
 	View,
 	Text,
 	FlatList,
@@ -15,16 +14,30 @@ import { sizes } from "../../utils/design";
 
 export default function Home() {
 	const [posts, setPosts] = useState([]);
+	const [refreshing, setRefreshing] = useState(false); // Track refresh state
 	const { user } = useContext(UserContext);
 
-	useEffect(() => {
-		async function fetchData() {
+	// Fetch data function
+	const fetchData = async () => {
+		try {
 			const fetchedPosts = await fetchPosts();
 			setPosts(fetchedPosts);
-			console.log("All posts:", fetchedPosts);
+		} catch (error) {
+			console.error("Error fetching posts:", error);
 		}
+	};
+
+	// Initial data fetch
+	useEffect(() => {
 		fetchData();
 	}, []);
+
+	// Handle pull-to-refresh
+	const handleRefresh = async () => {
+		setRefreshing(true);
+		await fetchData(); // Re-fetch the posts
+		setRefreshing(false); // Stop the refresh indicator
+	};
 
 	return (
 		<View style={styles.container}>
@@ -52,7 +65,9 @@ export default function Home() {
 				}}
 				contentContainerStyle={styles.flatlistContent}
 				keyboardShouldPersistTaps="handled"
-				ListFooterComponent={<View style={styles.footerSpacing} />} // Add spacing at the end
+				ListFooterComponent={<View style={styles.footerSpacing} />}
+				refreshing={refreshing} // Show the refreshing indicator
+				onRefresh={handleRefresh} // Triggered when pulled down
 			/>
 		</View>
 	);
@@ -60,13 +75,12 @@ export default function Home() {
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1, // Ensures the container occupies full height
-		// backgroundColor: "white", // Optional background
+		flex: 1,
 	},
 	flatlistContent: {
-        gap: 200,
+		gap: 200,
 	},
 	footerSpacing: {
-		height: 100, // Adjust to add space at the bottom
+		height: 100,
 	},
 });

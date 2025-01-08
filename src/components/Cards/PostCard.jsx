@@ -309,12 +309,14 @@ export default function PostCard({
 
 					{renderPaginationDots()}
 
+<View style={styles.buttonWrapper}>
 					<Button
 						variant="primary"
 						state="default"
 						size="small"
 						label="Try it!"
 					/>
+                    </View>
 				</View>
 
 				<View style={styles.mid}>
@@ -503,4 +505,8 @@ const styles = StyleSheet.create({
 	socialCountContainer: {
 		alignItems: "center",
 	},
+    buttonWrapper: {
+        flexDirection: 'row',
+        width: sizes.space[64]
+    }
 });
