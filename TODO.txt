@@ -1,0 +1,34 @@
+- Chat & Sharing
+- Make all buttons work (navigate to correct pages + other onPress things etc...)
+- IsLoading state on all pages with database interaction
+- Notifications / top icons
+- Make sure that journey dashboard works / is connected
+    - link domains, taskLists / tasks / rewards
+- Tasklists page
+- Make tasks work
+- Rewards (linked to tasks / tasksets)
+- No weird behaviour when typing (screen disapearing)
+- Fix comment bug on Post Card
+- isLoading state for everyting thats needs to be fetched + Skeletons for all Cards when isLoading
+- figure out how dailies vs challenges work
+- Chests
+- Asynchronous storage: store user login -> remember him
+- Figure out how Splash screens works + how to deploy
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
