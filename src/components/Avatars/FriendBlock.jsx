@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity, Pressable } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 import Button from "../Buttons/Button";
 import ActionButtons from "../Buttons/ActionButtons";
@@ -10,6 +10,7 @@ export default function FriendBlock({
 	showIcon = true,
 	showNotificationBubble = false,
 	name = "Anonymous",
+	description,
 	buttonText,
 	buttonLoading,
 	onMessagePress,
@@ -22,9 +23,10 @@ export default function FriendBlock({
 	onDenyPress,
 	approveLoading,
 	denyLoading,
+    onPress
 }) {
 	return (
-		<View style={styles.container}>
+		<Pressable style={styles.container} onPress={onPress}>
 			{showNotificationBubble && (
 				<Image
 					source={{ uri: notificationUri }}
@@ -50,9 +52,10 @@ export default function FriendBlock({
 							{
 								width: sizes.icon.large,
 								height: sizes.icon.large,
-                                justifyContent: "center",
+								justifyContent: "center",
 								alignItems: "center",
-                                backgroundColor: colors.background.default.secondary(),
+								backgroundColor:
+									colors.background.default.secondary(),
 							},
 						]}
 					>
@@ -65,6 +68,9 @@ export default function FriendBlock({
 				)}
 
 				<Text style={styles.name}>{name}</Text>
+				{description && (
+					<Text style={styles.description}>{description}</Text>
+				)}
 			</View>
 			{showButton === "Single" ? (
 				<Button
@@ -96,7 +102,7 @@ export default function FriendBlock({
 				/>
 				// </TouchableOpacity>
 			)}
-		</View>
+		</Pressable>
 	);
 }
 

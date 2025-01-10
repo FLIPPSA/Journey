@@ -3,9 +3,9 @@ import { Text, StyleSheet, Image, View } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 
 export default function Avatar({
-	type = "initial",
 	size = "medium",
 	shape = "circle",
+	color = "brand",
 	initials = "A",
 	imageUri,
 }) {
@@ -14,32 +14,47 @@ export default function Avatar({
 
 	const textSizes = {
 		large: typography.primitives.scale[20],
-		large: typography.primitives.scale[20],
 		medium: typography.primitives.scale[16],
 		small: typography.primitives.scale[14],
 	};
+
+	const sizeMapping = {
+		small: { width: sizes.icon.large, height: sizes.icon.large, iconSize: sizes.icon.small },
+		medium: { width: sizes.space[64], height: sizes.space[64], iconSize: sizes.icon.medium },
+		large: { width: sizes.space[96], height: sizes.space[96], iconSize: sizes.icon.large },
+	};
+
+	// Default to "medium" size if the size is invalid
+	const { width, height, iconSize } = sizeMapping[size] || sizeMapping.medium;
+
+	const backgroundColors = {
+		brand: colors.background.brand.default(),
+		gray: colors.background.default.tertiary(),
+	};
+
+	// Default to "brand" color if the color is invalid
+	const backgroundColor = backgroundColors[color] || backgroundColors.brand;
 
 	return (
 		<View
 			style={[
 				styles.container,
 				{
-					width: sizes.icon[size],
-					height: sizes.icon[size],
+					width,
+					height,
 					borderRadius,
-					backgroundColor:
-						type === "initial" && colors.background.brand.default(),
+					backgroundColor: imageUri ? "transparent" : backgroundColor,
 				},
 			]}
 		>
-			{type === "image" ? (
+			{imageUri ? (
 				<Image
 					source={{ uri: imageUri }}
 					style={[
 						styles.image,
 						{
-							width: sizes.icon[size],
-							height: sizes.icon[size],
+							width,
+							height,
 							borderRadius,
 						},
 					]}

@@ -4,72 +4,85 @@ import { colors, typography, sizes } from "../../utils/design";
 import Feather from "@expo/vector-icons/Feather";
 import Button from "./../Buttons/Button";
 import { useNavigation } from "expo-router";
+import { wp } from "../../utils/common";
 
 export default function UpperNavigationBack({
 	type = "message",
 	showHeading = true,
 	heading = "Heading",
-	showNext = true,
-	showBack = true,
-	showIcon = true,
+	showNext = false,
+	showBack = false,
+	showIcon = false,
 	onPressNext = () => {},
 }) {
 	const navigation = useNavigation();
 	return (
-		<View style={styles.container}>
-			{showBack && (
-				<Button
-					label="Back"
-					variant="neutral"
-					state="default"
-					size="medium"
-					onPress={() => navigation.goBack()}
-					leftIcon={"arrow-left"}
-				/>
-			)}
-			{showHeading && <Text style={styles.headingText}>{heading}</Text>}
-			{showNext && type === "back" && (
-				<Button
-					label="Next"
-					variant="primary"
-					state="default"
-					size="small"
-					onPress={onPressNext}
-					rightIcon={"arrow-right"}
-				/>
-			)}
-			{showIcon && type === "message" && (
-				<Feather
-					name="edit"
-					size={20}
-					color={colors.icon.default.default()}
-					style={styles.editIcon}
-				/>
-			)}
-			{!showNext && type === "back" && (
-				<View style={styles.placeholder} />
-			)}
-		</View>
-	);
+        <View style={styles.container}>
+            {!showBack && (
+                <View style={styles.sideButton}/>
+            )}
+            {showBack && (
+                <View style={styles.sideButton}>
+                    <Button
+                        label="Back"
+                        variant="neutral"
+                        state="default"
+                        size="medium"
+                        onPress={() => navigation.goBack()}
+                        leftIcon={"arrow-left"}
+                    />
+                </View>
+            )}
+            {showHeading && (
+                <Text style={styles.headingText}>{heading}</Text>
+            )}
+            {showNext && type === "back" && (
+                <View style={styles.sideButton}>
+                    <Button
+                        label="Next"
+                        variant="primary"
+                        state="default"
+                        size="small"
+                        onPress={onPressNext}
+                        rightIcon={"arrow-right"}
+                    />
+                </View>
+            )}
+            {showIcon && type === "message" && (
+                <View style={styles.sideButton}>
+                <Feather
+                    name="edit"
+                    size={20}
+                    color={colors.icon.default.default()}
+                    style={{textAlign: 'center'}}
+                />
+                </View>
+            )}
+            {!showIcon && type === "message" &&(
+                <View style={styles.sideButton}/>
+            )}
+        </View>
+    );
+    
 }
 
 const styles = StyleSheet.create({
-	container: {
-		alignItems: "center",
-		justifyContent: "space-between",
-		width: "100%",
-		flexDirection: "row",
-	},
-	headingText: {
-		fontFamily: typography.styles.heading.fontFamily(),
-		fontWeight: typography.styles.heading.fontWeight(),
-		color: colors.text.default.default(),
-	},
-	editIcon: {
-		padding: sizes.space[12],
-	},
-	placeholder: {
-		width: sizes.space[64],
-		height: sizes.space[40],
-	},
+    container: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        width: "100%",
+        height: sizes.space[64]
+    },
+    headingText: {
+        flex: 1, // Occupies the central space
+        textAlign: "center", // Centers the text horizontally
+        fontFamily: typography.styles.heading.fontFamily(),
+        fontWeight: typography.styles.heading.fontWeight(),
+        fontSize: typography.styles.heading.sizes.base(),
+        color: colors.text.default.default(),
+    },
+    sideButton: {
+        width: sizes.space[96], // Ensures consistent width for alignment'
+    },
 });

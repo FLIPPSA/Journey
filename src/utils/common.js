@@ -818,3 +818,77 @@ export const denyFriendRequest = async (senderId, receiverId) => {
 		throw error;
 	}
 };
+
+export const sendMessage = async (senderId, receiverId, content) => {
+	try {
+		// Validate input
+		if (!senderId || !receiverId || !content.trim()) {
+			throw new Error(
+				"All fields (senderId, receiverId, and message) are required."
+			);
+		}
+
+		// Insert the message into the `messages` table
+		const { data, error } = await supabase.from("messages").insert([
+			{
+				senderId,
+				receiverId,
+				content,
+			},
+		]);
+
+		if (error) {
+			throw new Error(error.message);
+		}
+
+		return data; // Return the inserted message for confirmation
+	} catch (error) {
+		console.error("Error sending message:", error.message);
+		throw error;
+	}
+};
+
+export const fetchChat = async (userId, chatPartnerId) => {
+	try {
+		// Validate input
+		if (!userId || !chatPartnerId) {
+			throw new Error("Both userId and chatPartnerId are required.");
+		}
+
+		// Fetch messages between the two users
+		const { data, error } = await supabase
+			.from("messages")
+			.select("*")
+			.or(
+				`and(senderId.eq.${userId},receiverId.eq.${chatPartnerId}),and(senderId.eq.${chatPartnerId},receiverId.eq.${userId})`
+			)
+			.order("createdAt", { ascending: false }); // Sort messages by creation time
+
+		if (error) {
+			throw new Error(error.message);
+		}
+
+		// Format createdAt into "OCT 31 - 9:30AM"
+		const formattedData = data.map((message) => {
+			const date = new Date(message.createdAt);
+			const month = date
+				.toLocaleString("default", { month: "short" })
+				.toUpperCase(); // Capitalize month
+			const day = date.getDate();
+			const hours = date.getHours() % 12 || 12; // Convert to 12-hour format
+			const minutes = String(date.getMinutes()).padStart(2, "0");
+			const amPm = date.getHours() >= 12 ? "PM" : "AM";
+
+			const formattedDate = `${month} ${day} - ${hours}:${minutes}${amPm}`;
+			return {
+				...message,
+				formattedCreatedAt: formattedDate, // Add formatted date
+			};
+		});
+
+		return formattedData; // Return the chat messages with formatted date
+	} catch (error) {
+		console.error("Error fetching chat:", error.message);
+		throw error;
+	}
+};

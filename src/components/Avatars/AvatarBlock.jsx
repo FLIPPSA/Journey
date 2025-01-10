@@ -1,74 +1,39 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import Avatar from "./Avatar"; // Assuming your Avatar component is in the same directory
 import { colors, typography, sizes } from "../../utils/design";
-import { Feather } from "@expo/vector-icons";
 
 export default function AvatarBlock({
-	layout = "horizontal",
-	showDescription = true,
-	description = "Description",
+	size = "medium",
+	shape = "circle",
+	color = "brand",
+	initials = "A",
+	imageUri,
 	name = "Name",
+	description = "Description",
+	layout,
+	showDescription = false,
 	showCheckIcon = false,
 	showXIcon = false,
 	icon = "Check",
-	avatarUri,
-    onPress
+	onPress,
 }) {
 	const isHorizontal = layout === "horizontal";
 
 	return (
 		<TouchableOpacity
-			style={styles.container}
-            onPress={onPress}
+			style={[styles.container, isHorizontal && styles.horizontalContainer]}
+			onPress={onPress}
 		>
-			<View style={styles.avatarContainer}>
-				{/* Render Avatar or Placeholder */}
-				{avatarUri ? (
-					<Image
-						source={{ uri: avatarUri }}
-						style={[
-							styles.avatar,
-							{
-								width: isHorizontal ? sizes.icon.medium : sizes.icon.large,
-								height: isHorizontal ? sizes.icon.medium : sizes.icon.large,
-							},
-						]}
-					/>
-				) : (
-					<View
-						style={[
-							styles.avatar,
-							{
-								width: isHorizontal ? sizes.icon.medium : sizes.icon.large,
-								height: isHorizontal ? sizes.icon.medium : sizes.icon.large,
-								justifyContent: "center",
-								alignItems: "center",
-								backgroundColor: colors.background.default.secondary(),
-							},
-						]}
-					>
-						<Feather
-							name="user"
-							size={isHorizontal ? sizes.icon.small : sizes.icon.medium}
-							color={colors.icon.default.default()}
-						/>
-					</View>
-				)}
-				{/* Show Check Icon */}
-				{showCheckIcon && (
-					<Image
-						source={{ uri: icon }}
-						style={[styles.checkIcon]}
-					/>
-				)}
-				{/* Show X Icon */}
-				{showXIcon && (
-					<Image
-						source={{ uri: "xIcon" }}
-						style={[styles.xIcon]}
-					/>
-				)}
-			</View>
+			{/* Avatar Component */}
+			<Avatar
+				size={size}
+				shape={shape}
+				color={color}
+				initials={initials}
+				imageUri={imageUri}
+			/>
+
 			{/* Info Container */}
 			<View
 				style={[
@@ -81,37 +46,32 @@ export default function AvatarBlock({
 					<Text style={styles.description}>{description}</Text>
 				)}
 			</View>
+
+			{/* Optional Icons */}
+			{showCheckIcon && (
+				<View style={styles.checkIcon}>
+					<Text style={styles.iconText}>✔</Text>
+				</View>
+			)}
+			{showXIcon && (
+				<View style={styles.xIcon}>
+					<Text style={styles.iconText}>✖</Text>
+				</View>
+			)}
 		</TouchableOpacity>
 	);
 }
 
 const styles = StyleSheet.create({
 	container: {
-		alignItems: "center",
-		justifyContent: "center",
 		width: "100%",
 		padding: sizes.space[16],
-		gap: sizes.space[16],
+        gap: sizes.space[8],
+		alignItems: "center",
 	},
-	avatarContainer: {
-		position: "relative",
-	},
-	avatar: {
-		borderRadius: sizes.radius.circle,
-	},
-	checkIcon: {
-		position: "absolute",
-		bottom: -sizes.space[4],
-		right: -sizes.space[4],
-		width: sizes.icon.xxSmall,
-		height: sizes.icon.xxSmall,
-	},
-	xIcon: {
-		position: "absolute",
-		top: sizes.space[2],
-		right: sizes.space[2],
-		width: sizes.icon.xxSmall,
-		height: sizes.icon.xxSmall,
+	horizontalContainer: {
+		flexDirection: "row",
+		gap: sizes.space[8],
 	},
 	infoContainer: {
 		gap: sizes.space[4],
@@ -130,5 +90,19 @@ const styles = StyleSheet.create({
 		fontSize: typography.styles.subheading.sizes.base(),
 		fontWeight: typography.styles.subheading.fontWeight(),
 		color: colors.text.default.secondary(),
+	},
+	checkIcon: {
+		position: "absolute",
+		bottom: -sizes.space[4],
+		right: -sizes.space[4],
+	},
+	xIcon: {
+		position: "absolute",
+		top: sizes.space[2],
+		right: sizes.space[2],
+	},
+	iconText: {
+		color: colors.text.default.default(),
+		fontSize: typography.primitives.scale[14],
 	},
 });

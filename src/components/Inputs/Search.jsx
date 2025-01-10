@@ -3,7 +3,12 @@ import { TextInput, StyleSheet, View } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 import Feather from "@expo/vector-icons/Feather";
 
-export default function Search({ state = "Default", text = "Search", onSearch }) {
+export default function Search({
+	state = "Default",
+	placeholder = "Search",
+	value,
+	onSearch,
+}) {
 	const getStylesByState = (state) => {
 		switch (state) {
 			case "Default":
@@ -21,9 +26,10 @@ export default function Search({ state = "Default", text = "Search", onSearch })
 		<View style={[styles.stateactiveLayout, getStylesByState(state)]}>
 			<TextInput
 				style={styles.searchText}
-				placeholder={text}
+				placeholder={placeholder}
 				placeholderTextColor={colors.text.default.secondary()}
 				onChangeText={onSearch}
+				value={value}
 			/>
 			<Feather
 				name="search"
@@ -36,7 +42,6 @@ export default function Search({ state = "Default", text = "Search", onSearch })
 
 const styles = StyleSheet.create({
 	stateactiveLayout: {
-		maxHeight: sizes.space[48],
 		gap: sizes.space[8],
 		paddingVertical: sizes.space[12],
 		paddingHorizontal: sizes.space[16],
@@ -44,17 +49,16 @@ const styles = StyleSheet.create({
 		borderStyle: "solid",
 		backgroundColor: colors.primitives.gray[100],
 		borderRadius: sizes.radius.circle,
-		alignSelf: "stretch",
 		alignItems: "center",
 		flexDirection: "row",
 	},
 	searchText: {
 		color: colors.text.default.default(),
-		textAlign: "left",
-		flex: 1,
+		fontSize: typography.styles.body.sizes.small(),
 		fontFamily: typography.styles.body.fontFamily(),
 		fontWeight: typography.styles.body.fontWeights.regular(),
-		fontSize: typography.styles.body.sizes.small(),
+		textAlign: "left",
+		flex: 1,
 	},
 	statedefault: {
 		borderColor: colors.border.default.default(),

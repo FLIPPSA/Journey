@@ -22,6 +22,7 @@ import ResetPassword from "../src/pages/Settings/ResetPassword";
 import Support from "../src/pages/Settings/Support";
 import CameraScreen from "../src/pages/NewPost/CameraScreen";
 import PostDetails from "../src/pages/Profile/PostDetails";
+import MessageTo from "../src/pages/Message/MessageTo";
 import { colors } from "../src/utils/design";
 
 const Stack = createNativeStackNavigator();
@@ -138,6 +139,7 @@ export default function App() {
 								name="PostDetails"
 								component={PostDetails}
 							/>
+                            <Tab.Screen name="MessageTo" component={MessageTo} />
 						</Stack.Navigator>
 					</SafeAreaView>
 				</GestureHandlerRootView>
