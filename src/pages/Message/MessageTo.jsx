@@ -29,7 +29,6 @@ export default function Message({ route }) {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const commentContentref = useRef(null);
-	const typingChannel = useRef(null);
 
 	const flatListRef = useRef(null);
 
@@ -84,6 +83,7 @@ export default function Message({ route }) {
 		typingChannel.subscribe();
 
 		return () => {
+            supabase.removeChannel(messageSubscription);
 			supabase.removeChannel(typingChannel); // Cleanup subscription
 		};
 	}, [chatPartner.id]);

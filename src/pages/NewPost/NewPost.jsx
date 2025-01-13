@@ -113,6 +113,8 @@ export default function NewPost({ navigation }) {
 			<UpperNavigationBack
 				type="back"
 				heading="New Post"
+                showBack={true}
+                showNext={true}
 				onPressNext={() =>
 					navigation.navigate("NewPostShare", {
 						selectedImages: selectedImages,

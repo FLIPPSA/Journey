@@ -892,3 +892,18 @@ export const fetchChat = async (userId, chatPartnerId) => {
 		throw error;
 	}
 };
+
+export const fetchDomains = async () => {
+	try {
+		const { data, error } = await supabase.from("domains").select("*");
+
+		if (error) {
+			throw new Error(`Error fetching domains: ${error.message}`);
+		}
+
+		return data; // Returns the array of domains
+	} catch (error) {
+		console.error("Error in fetchDomains:", error.message);
+		throw error; // Propagate the error for handling at the call site
+	}
+};

@@ -1,9 +1,9 @@
-- Chat & Sharing
+CHECK - Chat & Sharing
 - Make all buttons work (navigate to correct pages + other onPress things etc...)
-- IsLoading state on all pages with database interaction
 - Notifications / top icons
 - Make sure that journey dashboard works / is connected
     - link domains, taskLists / tasks / rewards
+- IsLoading state on all pages with database interaction
 - Tasklists page
 - Make tasks work
 - Rewards (linked to tasks / tasksets)

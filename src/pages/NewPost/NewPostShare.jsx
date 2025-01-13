@@ -1,7 +1,7 @@
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import UpperNavigationBack from "../../components/Navigation/UpperNavigationBack";
-import { handlePostUpload, wp } from "../../utils/common";
+import { fetchDomains, handlePostUpload, wp } from "../../utils/common";
 import { colors, sizes } from "../../utils/design";
 import Chip from "../../components/Tags/Chip";
 import InputField from "../../components/Inputs/InputField";
@@ -10,13 +10,23 @@ import { useNavigation } from "expo-router";
 import UserContext from "../../utils/authentication";
 
 export default function NewPostShare({ route }) {
-    const navigation = useNavigation();
+	const navigation = useNavigation();
 	const { selectedImages } = route.params;
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [caption, setCaption] = useState("");
 	const [domains, setDomains] = useState([]);
-    const [isLoading, setIsLoading] = useState(false)
+	const [isLoading, setIsLoading] = useState(false);
 	const { user } = useContext(UserContext);
+
+	const [selectedChip, setSelectedChip] = useState(null);
+
+	useEffect(() => {
+		async function fetchData() {
+			const fetchedDomains = await fetchDomains();
+			setDomains(fetchedDomains);
+		}
+		fetchData();
+	}, []);
 
 	// Render pagination dots
 	const renderPaginationDots = () => {
@@ -38,7 +48,7 @@ export default function NewPostShare({ route }) {
 	};
 	return (
 		<View style={styles.container}>
-			<UpperNavigationBack type="back" showNext={false}/>
+			<UpperNavigationBack type="back" showNext={false} showBack={true}/>
 			<View style={styles.carouselContainer}>
 				<FlatList
 					data={selectedImages}
@@ -66,30 +76,54 @@ export default function NewPostShare({ route }) {
 				<View style={styles.tagCategoryContainer}>
 					<Text>Tag category.</Text>
 					<View style={styles.domainRow}>
-						<Chip text="Other" />
-						{domains.map((domain, index) => {
-							<Chip key={index} text={domain.title} />;
-						})}
+						<Chip
+							text="Other"
+							active={selectedChip === "Other"} // Check if this chip is selected
+							onPress={() => setSelectedChip("Other")} // Update selected chip
+						/>
+						<FlatList
+							data={domains}
+							keyExtractor={(item, index) => index.toString()}
+							renderItem={({ item }) => (
+								<Chip
+									text={item.title}
+									active={selectedChip === item.id} // Check if this chip is selected
+									onPress={() => setSelectedChip(item.id)} // Update selected chip
+								/>
+							)}
+							horizontal
+							contentContainerStyle={styles.domainRow}
+							showsHorizontalScrollIndicator={false}
+						/>
 					</View>
 				</View>
-                <View style={styles.inputWrapper}>
-				<InputField
-					state="default"
-					valueType="default"
-					label="Caption the image."
-					value={caption}
-					onChangeText={setCaption}
-					placeholder="Type here..."
-				/>
-                </View>
+				<View style={styles.inputWrapper}>
+					<InputField
+						state="default"
+						valueType="default"
+						label="Caption the image."
+						value={caption}
+						onChangeText={setCaption}
+						placeholder="Type here..."
+					/>
+				</View>
+                <View style={styles.buttonWrapper}>
 				<Button
 					variant="primary"
 					state="default"
 					size="medium"
 					label="Share Post"
-                    isLoading={isLoading}
-                    onPress={async() => await handlePostUpload(navigation, selectedImages, caption, user.id)}
+					isLoading={isLoading}
+					onPress={async () =>
+						await handlePostUpload(
+							navigation,
+							selectedImages,
+							caption,
+							user.id
+						)
+					}
 				/>
+                </View>
 			</View>
 		</View>
 	);
@@ -134,11 +168,14 @@ const styles = StyleSheet.create({
 	tagCategoryContainer: {
 		gap: sizes.space[4],
 	},
-    domainRow: {
-        flexDirection: 'row',
-        gap: sizes.space[16],
-    },
-    inputWrapper: {
+	domainRow: {
+		flexDirection: "row",
+		gap: sizes.space[16],
+	},
+	inputWrapper: {
+		flexDirection: "row",
+	},
+    buttonWrapper: {
 		flexDirection: "row",
 	},
 });

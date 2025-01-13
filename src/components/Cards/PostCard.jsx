@@ -28,6 +28,7 @@ import { AntDesign } from "@expo/vector-icons";
 import Commenting from "../../pages/Homepage/Commenting";
 import Link from "../Navigation/Link";
 import { TouchableOpacity } from "react-native";
+import Sharing from "../../pages/Homepage/Sharing";
 
 export default function PostCard({
 	user,
@@ -51,7 +52,8 @@ export default function PostCard({
 	const [currentLikeCount, setCurrentLikeCount] = useState(likes);
 	const [showHeart, setShowHeart] = useState(false);
 	const [commentSectionVisible, setCommentSectionVisible] = useState(false);
-    const scaleAnim = useRef(new Animated.Value(hp(100))).current;
+	const [shareSectionVisible, setShareSectionVisible] = useState(false);
+	const scaleAnim = useRef(new Animated.Value(hp(100))).current;
 	const slideAnim = useRef(new Animated.Value(hp(100))).current; // Modal position
 	const overlayOpacity = useRef(new Animated.Value(0)).current; // Overlay opacity
 	const heartScaleAnim = useRef(new Animated.Value(0)).current;
@@ -62,8 +64,55 @@ export default function PostCard({
 		setCaptionIsExpanded((prev) => !prev);
 	};
 
-	const openCommentSection = () => {
-		setCommentSectionVisible(true);
+	const openSection = (setFunction, upValue) => {
+		setFunction(true);
+		Animated.parallel([
+			Animated.timing(slideAnim, {
+				toValue: upValue,
+				duration: 300,
+				useNativeDriver: true,
+			}),
+			Animated.timing(overlayOpacity, {
+				toValue: 1, // Fade in overlay
+				duration: 300,
+				useNativeDriver: true,
+			}),
+		]).start();
+	};
+
+	const openShareSection = () => {
+		setShareSectionVisible(true);
+		Animated.parallel([
+			Animated.timing(slideAnim, {
+				toValue: hp(50),
+				duration: 300,
+				useNativeDriver: true,
+			}),
+			Animated.timing(overlayOpacity, {
+				toValue: 1, // Fade in overlay
+				duration: 300,
+				useNativeDriver: true,
+			}),
+		]).start();
+	};
+
+	const closeSection = (setFunction) => {
+		Animated.parallel([
+			Animated.timing(slideAnim, {
+				toValue: hp(100),
+				duration: 300,
+				useNativeDriver: true,
+			}),
+			Animated.timing(overlayOpacity, {
+				toValue: 0,
+				duration: 300,
+				useNativeDriver: true,
+			}),
+		]).start(() => setFunction(false)); // Set visibility to false after animation
+	};
+
+	const closeShareSection = () => {
+		setShareSectionVisible(true);
 		Animated.parallel([
 			Animated.timing(slideAnim, {
 				toValue: hp(0),
@@ -76,21 +125,6 @@ export default function PostCard({
 				useNativeDriver: true,
 			}),
 		]).start();
-	};
-
-	const closeCommentSection = () => {
-		Animated.parallel([
-			Animated.timing(slideAnim, {
-				toValue: hp(100),
-				duration: 300,
-				useNativeDriver: true,
-			}),
-			Animated.timing(overlayOpacity, {
-				toValue: 0,
-				duration: 300,
-				useNativeDriver: true,
-			}),
-		]).start(() => setCommentSectionVisible(false)); // Set visibility to false after animation
 	};
 
 	useEffect(() => {
@@ -268,7 +302,9 @@ export default function PostCard({
 								name="message-circle"
 								size={24}
 								color={colors.icon.default.default()}
-								onPress={openCommentSection} // Open comment section on message button click
+								onPress={() =>
+									openSection(setCommentSectionVisible, hp(0))
+								}
 							/>
 							<Text>{commentCount}</Text>
 						</View>
@@ -295,7 +331,9 @@ export default function PostCard({
 								<Commenting
 									user={user}
 									postId={id}
-									closeSection={closeCommentSection}
+									closeSection={() =>
+										closeSection(setCommentSectionVisible)
+									}
 								/>
 							</Animated.View>
 						</Modal>
@@ -304,19 +342,50 @@ export default function PostCard({
 							name="share-2"
 							size={24}
 							color={colors.icon.default.default()}
+							onPress={() =>
+								openSection(setShareSectionVisible, hp(50))
+							}
 						/>
+						<Modal
+							transparent
+							visible={shareSectionVisible}
+							animationType="none"
+						>
+							{/* Overlay */}
+							<Animated.View
+								style={[
+									styles.overlay,
+									{ opacity: overlayOpacity },
+								]}
+							/>
+
+							{/* Animated Commenting Section */}
+							<Animated.View
+								style={[
+									styles.modalContent,
+									{ transform: [{ translateY: slideAnim }] },
+								]}
+							>
+								<Sharing
+									user={user}
+									closeSection={() =>
+										closeSection(setShareSectionVisible)
+									}
+								/>
+							</Animated.View>
+						</Modal>
 					</View>
 
 					{renderPaginationDots()}
 
-<View style={styles.buttonWrapper}>
-					<Button
-						variant="primary"
-						state="default"
-						size="small"
-						label="Try it!"
-					/>
-                    </View>
+					<View style={styles.buttonWrapper}>
+						<Button
+							variant="primary"
+							state="default"
+							size="small"
+							label="Try it!"
+						/>
+					</View>
 				</View>
 
 				<View style={styles.mid}>
@@ -355,7 +424,7 @@ export default function PostCard({
 					label="View all comments"
 					hasIconEnd={true}
 					iconEnd="chevron-right"
-					onPress={openCommentSection}
+					onPress={() => openSection(openCommentSection, hp(0))}
 				/>
 			</View>
 		</View>
@@ -505,8 +574,8 @@ const styles = StyleSheet.create({
 	socialCountContainer: {
 		alignItems: "center",
 	},
-    buttonWrapper: {
-        flexDirection: 'row',
-        width: sizes.space[64]
-    }
+	buttonWrapper: {
+		flexDirection: "row",
+		width: sizes.space[64],
+	},
 });

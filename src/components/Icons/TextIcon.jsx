@@ -1,11 +1,11 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { colors, typography, sizes } from "../../utils/design";
 
-export default function TextIcon({ from, name, number }) {
+export default function TextIcon({ from, name, number, onPress }) {
 	return (
-		<View style={styles.container}>
+		<Pressable style={styles.container} onPress={onPress}>
 			{from === "Feather" && (
 				<Feather
 					name={name}
@@ -25,7 +25,7 @@ export default function TextIcon({ from, name, number }) {
 					<Text style={styles.iconText}>{number}</Text>
 				</View>
 			)}
-		</View>
+		</Pressable>
 	);
 }
 

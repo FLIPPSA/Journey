@@ -31,6 +31,7 @@ export default function Profile({ navigation }) {
 	const [friends, setFriends] = useState([]);
 	const [allUsers, setAllUsers] = useState([]);
 	const [pendingRequests, setPendingRequests] = useState([]);
+
 	const { user } = useContext(UserContext);
 
 	const [denyLoading, setDenyLoading] = useState(false);
@@ -41,6 +42,10 @@ export default function Profile({ navigation }) {
 	const [postRefreshing, setPostRefreshing] = useState(false);
 	const [friendRefreshing, setFriendRefreshing] = useState(false);
 
+	// useEffect(() => {
+	// 	setSearchQuery("");
+	// }, [activeTab]);
+
 	const handleApproveFriendRequest = async (senderId) => {
 		setApproveLoading(true);
 		await approveFriendRequest(senderId, user.id);
@@ -49,7 +54,7 @@ export default function Profile({ navigation }) {
 		setApproveLoading(false);
 	};
 
-    const handleSendFriendRequest = async (receiverId) => {
+	const handleSendFriendRequest = async (receiverId) => {
 		setRequestLoading(true);
 		await addFriend(user.id, receiverId);
 		await fetchPendingFriendRequestsFunction();
@@ -135,7 +140,7 @@ export default function Profile({ navigation }) {
 		fetchPendingFriendRequestsFunction();
 		fetchDiscoverUsersFunction();
 
-        console.log('Pending requests:', pendingRequests)
+		console.log("Pending requests:", pendingRequests);
 	}, []);
 
 	// Fetch discovery users when searchQuery changes
@@ -161,22 +166,33 @@ export default function Profile({ navigation }) {
 	const renderActiveScreen = () => {
 		switch (activeTab) {
 			case "Friends":
+				const filteredFriends = friends.filter((friend) =>
+					friend.username
+						.toLowerCase()
+						.includes(searchQuery.toLowerCase())
+				);
 				return (
 					<View style={[styles.screen, styles.contentContainer]}>
 						<View style={styles.searchContainer}>
-							<Search />
+							<Search onSearch={setSearchQuery}/>
 						</View>
 						<FlatList
-							data={friends}
+							data={filteredFriends}
 							keyExtractor={(item) => item.id.toString()}
 							renderItem={({ item }) => {
 								return (
 									<FriendBlock
-                                    name={item.username}
-                                    avatarUri={item.profilePicture}
-                                    buttonText={"Message"}
-                                    messageIcon={true}
-                                    moreIcon={true}
+										name={item.username}
+										avatarUri={item.profilePicture}
+										buttonText={"Message"}
+										messageIcon={true}
+										moreIcon={true}
+										onMessagePress={() =>
+											navigation.navigate("MessageTo", {
+												user,
+												chatPartner: item,
+											})
+										}
 									/>
 								);
 							}}
@@ -310,8 +326,10 @@ export default function Profile({ navigation }) {
 									name={item.username}
 									avatarUri={item.profilePicture}
 									buttonText={"Request Friend"}
-									onMessagePress={() => handleSendFriendRequest(item.id)}
-                                    buttonLoading={requestLoading}
+									onMessagePress={() =>
+										handleSendFriendRequest(item.id)
+									}
+									buttonLoading={requestLoading}
 								/>
 							)}
 							// contentContainerStyle={styles.flatlistContent}
@@ -331,8 +349,11 @@ export default function Profile({ navigation }) {
 			<ProfileNavigation profileName={user.username} showBack={false} />
 			<Tabs
 				label1="Friends"
+                showTab2={true}
 				label2="Achievements"
+                showTab3={true}
 				label3="Posts"
+                showTab4={true}
 				label4="Discover"
 				showTab5={false}
 				activeTab={activeTab}

@@ -5,8 +5,11 @@ import TextIcon from "../Icons/TextIcon";
 import Logo from "../Brand/Logo";
 import IconButton from "../Buttons/IconButton";
 import TextButton from "../Buttons/TextButton";
+import { useNavigation } from "expo-router";
 
 export default function UpperNavigation({ domains = [] }) {
+    const navigation = useNavigation();
+
 	return (
 		<View style={styles.container}>
 			{/* Upper Section */}
@@ -17,13 +20,14 @@ export default function UpperNavigation({ domains = [] }) {
 
 					{/* Icons */}
 					<View style={styles.upperIcons}>
-						<TextIcon from={"Feather"} name={"bell"} number={5} />
+						<TextIcon from={"Feather"} name={"bell"} number={5} onPress={() => navigation.navigate("Notifications")}/>
 						<TextIcon
 							from={"MaterialCommunityIcons"}
 							name={"treasure-chest"}
 							number={"8"}
+                            onPress={() => navigation.navigate("Rewards")}
 						/>
-						<TextIcon from={"Feather"} name={"shopping-cart"} />
+						<TextIcon from={"Feather"} name={"shopping-cart"} onPress={() => navigation.navigate("Store")}/>
 					</View>
 				</View>
 			</View>

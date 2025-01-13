@@ -1,7 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Pressable } from "react-native";
 import Avatar from "./Avatar"; // Assuming your Avatar component is in the same directory
 import { colors, typography, sizes } from "../../utils/design";
+import { Feather } from "@expo/vector-icons";
 
 export default function AvatarBlock({
 	size = "medium",
@@ -21,7 +22,7 @@ export default function AvatarBlock({
 	const isHorizontal = layout === "horizontal";
 
 	return (
-		<TouchableOpacity
+		<Pressable
 			style={[styles.container, isHorizontal && styles.horizontalContainer]}
 			onPress={onPress}
 		>
@@ -50,7 +51,7 @@ export default function AvatarBlock({
 			{/* Optional Icons */}
 			{showCheckIcon && (
 				<View style={styles.checkIcon}>
-					<Text style={styles.iconText}>✔</Text>
+					<Feather name="check" size={sizes.icon.xSmall} color={colors.icon.default.default()} />
 				</View>
 			)}
 			{showXIcon && (
@@ -58,13 +59,13 @@ export default function AvatarBlock({
 					<Text style={styles.iconText}>✖</Text>
 				</View>
 			)}
-		</TouchableOpacity>
+		</Pressable>
 	);
 }
 
 const styles = StyleSheet.create({
 	container: {
-		width: "100%",
+		// width: "100%",
 		padding: sizes.space[16],
         gap: sizes.space[8],
 		alignItems: "center",
@@ -93,8 +94,11 @@ const styles = StyleSheet.create({
 	},
 	checkIcon: {
 		position: "absolute",
-		bottom: -sizes.space[4],
-		right: -sizes.space[4],
+		bottom: sizes.space[40],
+		right: sizes.space[12],
+        padding: sizes.space[2],
+        backgroundColor: colors.background.brand.secondaryActive(),
+        borderRadius: sizes.radius.circle,
 	},
 	xIcon: {
 		position: "absolute",

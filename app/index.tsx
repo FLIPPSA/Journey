@@ -24,6 +24,9 @@ import CameraScreen from "../src/pages/NewPost/CameraScreen";
 import PostDetails from "../src/pages/Profile/PostDetails";
 import MessageTo from "../src/pages/Message/MessageTo";
 import { colors } from "../src/utils/design";
+import Notifications from "../src/pages/TopRightIcons/Notifications";
+import Rewards from "../src/pages/TopRightIcons/Rewards";
+import Store from "../src/pages/TopRightIcons/Store";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -140,6 +143,9 @@ export default function App() {
 								component={PostDetails}
 							/>
                             <Tab.Screen name="MessageTo" component={MessageTo} />
+                            <Tab.Screen name="Notifications" component={Notifications} />
+                            <Tab.Screen name="Rewards" component={Rewards} />
+                            <Tab.Screen name="Store" component={Store} />
 						</Stack.Navigator>
 					</SafeAreaView>
 				</GestureHandlerRootView>

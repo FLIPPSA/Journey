@@ -4,13 +4,13 @@ import Tab from "./Tab";
 
 export default function Tabs({
 	label1 = "Tab",
-	showTab2 = true,
+	showTab2 = false,
 	label2 = "Tab",
-	showTab3 = true,
+	showTab3 = false,
 	label3 = "Tab",
-	showTab4 = true,
+	showTab4 = false,
 	label4 = "Tab",
-	showTab5 = true,
+	showTab5 = false,
 	label5 = "Tab",
 	activeTab,
 	setActiveTab,

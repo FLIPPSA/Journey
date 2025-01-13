@@ -1,10 +1,11 @@
 import * as React from "react";
-import { Text, StyleSheet, View } from "react-native";
+import { Text, StyleSheet, View, Pressable } from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 
-export default function Chip({ active = true, text = "Chip" }) {
+export default function Chip({ active = false, text = "Chip", onPress }) {
 	return (
-		<View
+		<Pressable
+			onPress={onPress}
 			style={[
 				styles.container,
 				active ? styles.activeChip : styles.inactiveChip,
@@ -18,7 +19,7 @@ export default function Chip({ active = true, text = "Chip" }) {
 			>
 				{text}
 			</Text>
-		</View>
+		</Pressable>
 	);
 }
 
@@ -29,7 +30,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 		borderRadius: sizes.radius.circle,
-        alignSelf: "flex-start",
+		alignSelf: "flex-start",
 	},
 	inactiveChip: {
 		borderWidth: sizes.stroke[1],
