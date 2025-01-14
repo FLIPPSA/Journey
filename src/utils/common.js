@@ -229,7 +229,14 @@ export async function handlePostUpload(
 		console.error("Error uploading post with images:", error);
 		throw error;
 	} finally {
-		navigation.navigate("NavBar");
+		navigation.navigate("NavBar", {
+			screen: "Home", // Specify "Home" as the target screen
+			params: {
+				uploaded: true,
+				heading: "Post Shared",
+				linkText: "See Post",
+			},
+		});
 	}
 }
 

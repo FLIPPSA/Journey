@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
 	content: {
 		width: "100%",
 		flexDirection: "row",
-		gap: sizes.space[8],
+		gap: sizes.space[12],
 		justifyContent: "space-between",
 		alignItems: "center",
 	},

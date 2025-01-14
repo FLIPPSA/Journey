@@ -5,6 +5,7 @@ import { useContext, useEffect, useState } from "react";
 import { fetchDomains, fetchPosts, toggleSelection } from "../../utils/common";
 import UserContext from "../../utils/authentication";
 import { sizes } from "../../utils/design";
+import NotificationBanner from "../../components/Dialog/NotificationBanner";
 
 export default function Home({ route }) {
 	const [posts, setPosts] = useState([]);
@@ -13,6 +14,15 @@ export default function Home({ route }) {
 	const [domains, setDomains] = useState([]);
 	const [selectedDomains, setSelectedDomains] = useState(["All"]);
 
+	const [showPostUploadNotification, setShowPostUploadNotification] = useState(false);
+
+	const { uploaded, heading, linkText } = route?.params || {};
+
+	// Initial data fetch
+	useEffect(() => {
+		fetchPostsFunction();
+	}, [selectedDomains]); // Refetch posts whenever selectedDomains change
+
 	useEffect(() => {
 		async function fetchData() {
 			const fetchedDomains = await fetchDomains();
@@ -20,6 +30,21 @@ export default function Home({ route }) {
 		}
 		fetchData();
 	}, []);
+
+	useEffect(() => {
+		if (uploaded) {
+			// Show the square when `uploaded` is true
+			setShowPostUploadNotification(true);
+
+			// Hide the square after 2 seconds
+			// const timer = setTimeout(() => {
+			// 	setShowPostUploadNotification(false);
+			// }, 3000);
+
+			// Cleanup the timer when the component unmounts
+			// return () => clearTimeout(timer);
+		}
+	}, [uploaded]);
 
 	// Fetch data function
 	const fetchPostsFunction = async () => {
@@ -31,20 +56,22 @@ export default function Home({ route }) {
 		}
 	};
 
-	// Initial data fetch
-	useEffect(() => {
-		fetchPostsFunction();
-	}, [selectedDomains]); // Refetch posts whenever selectedDomains change
-
 	// Handle pull-to-refresh
 	const handleRefresh = async () => {
 		setRefreshing(true);
-		await fetchData(); // Re-fetch the posts
+		await fetchPostsFunction(); // Re-fetch the posts
 		setRefreshing(false); // Stop the refresh indicator
 	};
 
 	return (
 		<View style={styles.container}>
+			{showPostUploadNotification && (
+				<NotificationBanner
+					heading={heading}
+					linkText={linkText}
+					onClose={() => setShowPostUploadNotification(false)}
+				/>
+			)}
 			<UpperNavigation
 				domains={domains}
 				selectedDomains={selectedDomains}
