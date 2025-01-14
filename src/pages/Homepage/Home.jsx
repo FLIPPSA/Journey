@@ -1,26 +1,30 @@
-import {
-	Image,
-	StyleSheet,
-	View,
-	Text,
-	FlatList,
-} from "react-native";
+import { Image, StyleSheet, View, Text, FlatList } from "react-native";
 import UpperNavigation from "../../components/Navigation/UpperNavigation";
 import PostCard from "../../components/Cards/PostCard";
 import { useContext, useEffect, useState } from "react";
-import { fetchPosts } from "../../utils/common";
+import { fetchDomains, fetchPosts, toggleSelection } from "../../utils/common";
 import UserContext from "../../utils/authentication";
 import { sizes } from "../../utils/design";
 
-export default function Home() {
+export default function Home({ route }) {
 	const [posts, setPosts] = useState([]);
 	const [refreshing, setRefreshing] = useState(false); // Track refresh state
 	const { user } = useContext(UserContext);
+	const [domains, setDomains] = useState([]);
+	const [selectedDomains, setSelectedDomains] = useState(["All"]);
+
+	useEffect(() => {
+		async function fetchData() {
+			const fetchedDomains = await fetchDomains();
+			setDomains(fetchedDomains);
+		}
+		fetchData();
+	}, []);
 
 	// Fetch data function
-	const fetchData = async () => {
+	const fetchPostsFunction = async () => {
 		try {
-			const fetchedPosts = await fetchPosts();
+			const fetchedPosts = await fetchPosts(selectedDomains);
 			setPosts(fetchedPosts);
 		} catch (error) {
 			console.error("Error fetching posts:", error);
@@ -29,8 +33,8 @@ export default function Home() {
 
 	// Initial data fetch
 	useEffect(() => {
-		fetchData();
-	}, []);
+		fetchPostsFunction();
+	}, [selectedDomains]); // Refetch posts whenever selectedDomains change
 
 	// Handle pull-to-refresh
 	const handleRefresh = async () => {
@@ -41,7 +45,11 @@ export default function Home() {
 
 	return (
 		<View style={styles.container}>
-			<UpperNavigation />
+			<UpperNavigation
+				domains={domains}
+				selectedDomains={selectedDomains}
+				setSelectedDomains={setSelectedDomains}
+			/>
 			<FlatList
 				data={posts}
 				keyExtractor={(item) => item.id}

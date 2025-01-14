@@ -38,6 +38,8 @@ const styles = StyleSheet.create({
 	},
 	activeChip: {
 		backgroundColor: colors.background.default.tertiary(),
+        borderWidth: sizes.stroke[1],
+		borderColor: colors.background.default.tertiary(),
 	},
 	chipText: {
 		fontSize: typography.styles.body.sizes.base(),

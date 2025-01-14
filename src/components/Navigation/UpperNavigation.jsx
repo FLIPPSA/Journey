@@ -1,14 +1,26 @@
-import * as React from "react";
-import { Image, StyleSheet, View, Text } from "react-native";
+import {
+	Image,
+	StyleSheet,
+	View,
+	Text,
+	FlatList,
+	Animated,
+} from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 import TextIcon from "../Icons/TextIcon";
 import Logo from "../Brand/Logo";
 import IconButton from "../Buttons/IconButton";
 import TextButton from "../Buttons/TextButton";
 import { useNavigation } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import { toggleSelection } from "../../utils/common";
 
-export default function UpperNavigation({ domains = [] }) {
-    const navigation = useNavigation();
+export default function UpperNavigation({
+	domains = [],
+	selectedDomains,
+	setSelectedDomains,
+}) {
+	const navigation = useNavigation();
 
 	return (
 		<View style={styles.container}>
@@ -20,14 +32,23 @@ export default function UpperNavigation({ domains = [] }) {
 
 					{/* Icons */}
 					<View style={styles.upperIcons}>
-						<TextIcon from={"Feather"} name={"bell"} number={5} onPress={() => navigation.navigate("Notifications")}/>
+						<TextIcon
+							from={"Feather"}
+							name={"bell"}
+							number={5}
+							onPress={() => navigation.navigate("Notifications")}
+						/>
 						<TextIcon
 							from={"MaterialCommunityIcons"}
 							name={"treasure-chest"}
 							number={"8"}
-                            onPress={() => navigation.navigate("Rewards")}
+							onPress={() => navigation.navigate("Rewards")}
 						/>
-						<TextIcon from={"Feather"} name={"shopping-cart"} onPress={() => navigation.navigate("Store")}/>
+						<TextIcon
+							from={"Feather"}
+							name={"shopping-cart"}
+							onPress={() => navigation.navigate("Store")}
+						/>
 					</View>
 				</View>
 			</View>
@@ -35,15 +56,31 @@ export default function UpperNavigation({ domains = [] }) {
 			{/* Lower Section */}
 			<View style={styles.lower}>
 				<View style={styles.content}>
-					<TextButton variant="Neutral" text="All" />
-					{domains.map((domain, index) => (
-						<IconButton
-							key={index}
-							variant="neutral"
-							icon={domain.icon}
-							text={domain.description}
-						/>
-					))}
+					<IconButton
+						from="Image"
+						icon={require("../../../assets/images/infity_wallpaper.jpg")}
+						text={"All"}
+						active={selectedDomains.includes("All")}
+						onPress={() => toggleSelection("All", setSelectedDomains, "All")}
+					/>
+
+					<FlatList
+						data={domains}
+						keyExtractor={(item, index) => index.toString()}
+						renderItem={({ item }) => (
+							<IconButton
+								from="Image"
+								icon={item.fileUrl}
+								text={item.title}
+								active={selectedDomains.includes(item.id)}
+								onPress={() => toggleSelection(item.id, setSelectedDomains, "All")}
+							/>
+						)}
+						horizontal
+						showsHorizontalScrollIndicator={false}
+						contentContainerStyle={styles.domainList} // Ensure overflow is visible
+						style={{ overflow: "visible" }} // Ensure FlatList itself allows overflow
+					/>
 				</View>
 			</View>
 		</View>
@@ -67,6 +104,7 @@ const styles = StyleSheet.create({
 	content: {
 		width: "100%",
 		flexDirection: "row",
+		gap: sizes.space[8],
 		justifyContent: "space-between",
 		alignItems: "center",
 	},
@@ -113,4 +151,8 @@ const styles = StyleSheet.create({
 	activeCategory: {
 		backgroundColor: colors.background.brand.default(),
 	},
+    domainList: {
+        gap: sizes.space[12],
+        overflow: "visible"
+    }
 });

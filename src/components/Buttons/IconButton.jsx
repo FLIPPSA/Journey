@@ -1,5 +1,13 @@
-import React from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity } from "react-native";
+import React, { useEffect, useRef } from "react";
+import {
+	StyleSheet,
+	View,
+	Text,
+	Image,
+	TouchableOpacity,
+	Pressable,
+	Animated,
+} from "react-native";
 import { colors, typography, sizes } from "../../utils/design";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -14,14 +22,25 @@ export default function IconButton({
 	text = "Text",
 	onPress,
 }) {
+	const scaleAnim = useRef(new Animated.Value(1)).current;
+
+	useEffect(() => {
+		Animated.timing(scaleAnim, {
+			toValue: active ? 1.2 : 1, // Scale up if active, reset if not
+			duration: 200,
+			useNativeDriver: true,
+		}).start();
+	}, [active]);
+
 	const getStyles = () => {
 		const baseStyle = {
 			iconContainer: [
 				styles.iconContainer,
 				styles[`${variant}${active ? "Active" : ""}`],
+				from === "Image" && { padding: 0 }, // No padding for Image
 			],
 			iconSizes: styles[`icon${size}`],
-			textStyle: styles[`text${size}`],
+			textStyle: [styles[`text${size}`]],
 		};
 		return baseStyle;
 	};
@@ -29,8 +48,10 @@ export default function IconButton({
 	const { iconContainer, textStyle } = getStyles();
 
 	return (
-		<TouchableOpacity style={styles.container} onPress={onPress}>
-			<View style={iconContainer}>
+		<Pressable style={styles.container} onPress={onPress}>
+			<Animated.View
+				style={[iconContainer, { transform: [{ scale: scaleAnim }] }]}
+			>
 				{from === "Feather" && (
 					<Feather
 						name={icon}
@@ -39,7 +60,10 @@ export default function IconButton({
 					/>
 				)}
 				{from === "Image" && (
-					<Image source={icon} style={styles.icon} />
+					<Image
+						source={typeof icon === "number" ? icon : { uri: icon }}
+						style={styles.image}
+					/>
 				)}
 				{from === "FontAwesome6" && (
 					<FontAwesome6
@@ -48,9 +72,9 @@ export default function IconButton({
 						color={colors.icon.default.inverse()}
 					/>
 				)}
-			</View>
+			</Animated.View>
 			{showText && <Text style={textStyle}>{text}</Text>}
-		</TouchableOpacity>
+		</Pressable>
 	);
 }
 
@@ -63,6 +87,9 @@ const styles = StyleSheet.create({
 	iconContainer: {
 		borderRadius: sizes.radius.circle,
 		padding: sizes.space[8],
+        overflow: "visible", // Allow the image to expand outside the container
+        alignItems: "center", // Ensure content stays centered
+        justifyContent: "center", // Center content vertically
 	},
 	primary: {
 		backgroundColor: colors.background.brand.default(),
@@ -108,5 +135,12 @@ const styles = StyleSheet.create({
 		fontWeight: typography.styles.body.fontWeights.regular(),
 		fontFamily: typography.styles.body.fontFamily(),
 		color: colors.text.default.default(),
+	},
+	image: {
+		width: sizes.icon.xxLarge,
+		height: sizes.icon.xxLarge,
+		borderRadius: sizes.radius.circle,
+        resizeMode: "cover", // Keep the image proportions intact
+        overflow: "hidden", // Ensure the borderRadius applies correctly
 	},
 });

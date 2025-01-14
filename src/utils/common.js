@@ -117,48 +117,78 @@ export const fetchAllTasksets = async () => {
 	return tasksets;
 };
 
-export const fetchPosts = async ({ belongingDomain } = {}) => {
+export const fetchPosts = async (belongingDomain) => {
 	try {
-		const { data: posts, error } = await supabase.from("posts").select(
-			`
+		// If `belongingDomain` includes "All", fetch all posts without constraints
+		if (belongingDomain?.includes("All")) {
+			const { data: posts, error } = await supabase
+				.from("posts")
+				.select(
+					`
                     *,
                     user:users(username, profilePicture),
                     likes:likes(userId, commentId),
                     commentCount:comments!left(postId)
                 `
-		);
+				)
+				.order("createdAt", { ascending: false }); // Sort by newest posts
+
+			if (error) {
+				throw new Error(error.message);
+			}
+
+			return formatPosts(posts);
+		}
+
+		// Fetch posts filtered by domain IDs
+		const { data: posts, error } = await supabase
+			.from("posts")
+			.select(
+				`
+                    *,
+                    user:users(username, profilePicture),
+                    likes:likes(userId, commentId),
+                    commentCount:comments!left(postId),
+                    postDomains!inner(domainId)
+                `
+			)
+			.in("postDomains.domainId", belongingDomain)
+			.order("createdAt", { ascending: false }); // Sort by newest posts
 
 		if (error) {
 			throw new Error(error.message);
 		}
 
-		// Format the posts data
-		const formattedPosts = posts.map((post) => {
-			const postLikes =
-				post.likes?.filter((like) => !like.commentId) || []; // Only likes without commentId
-			return {
-				...post,
-				time: formatTime(post.createdAt),
-				name: post.user?.username, // Add `username` directly
-				avatar: post.user?.profilePicture, // Add `profilePicture` directly
-				likeCount: postLikes.length, // Count only likes for posts
-				commentCount: post.commentCount?.length || 0, // Count the number of comments
-				fileUrls: post.fileUrls ? JSON.parse(post.fileUrls) : [], // Parse the JSON string into an array
-			};
-		});
-
-		return formattedPosts;
+		return formatPosts(posts);
 	} catch (error) {
 		console.error("Error fetching posts:", error);
 		throw error;
 	}
 };
 
+// Helper function to format posts
+const formatPosts = (posts) => {
+	return posts.map((post) => {
+		const postLikes = post.likes?.filter((like) => !like.commentId) || []; // Only likes without commentId
+		return {
+			...post,
+			time: formatTime(post.createdAt),
+			name: post.user?.username, // Add `username` directly
+			avatar: post.user?.profilePicture, // Add `profilePicture` directly
+			likeCount: postLikes.length, // Count only likes for posts
+			commentCount: post.commentCount?.length || 0, // Count the number of comments
+			fileUrls: post.fileUrls ? JSON.parse(post.fileUrls) : [], // Parse the JSON string into an array
+		};
+	});
+};
+
 export async function handlePostUpload(
 	navigation,
 	selectedImages,
 	caption,
-	userId
+	userId,
+	selectedDomains,
+	domains
 ) {
 	try {
 		// Array to store the public URLs of uploaded images
@@ -175,11 +205,24 @@ export async function handlePostUpload(
 		const fileUrls = uploadedImageUrls.filter((url) => url !== null);
 
 		// Insert post with the array of uploaded image URLs
-		await uploadRowToDatabase("posts", {
+		const post = await uploadRowToDatabase("posts", {
 			caption,
 			fileUrls,
 			userId,
 		});
+
+		if (!selectedDomains.includes("Other")) {
+			await uploadMappingTable(
+				selectedDomains,
+				domains,
+				[],
+				"title",
+				"postDomains",
+				post[0].id,
+				"postId",
+				"domainId"
+			);
+		}
 
 		console.log("Post uploaded successfully!");
 	} catch (error) {
@@ -207,8 +250,6 @@ export async function uploadFileToStorage(file, bucketName) {
 	try {
 		const uniqueID = uuidv4(); // Generate a unique ID for the file
 		const extension = getFileExtension(file); // Get file extension
-		console.log("Extension:", extension);
-		console.log("Real path:", file);
 
 		// Supabase storage endpoint for uploading the file
 		const filePath = `${bucketName}/${uniqueID}.${extension}`;
@@ -906,4 +947,117 @@ export const fetchDomains = async () => {
 		console.error("Error in fetchDomains:", error.message);
 		throw error; // Propagate the error for handling at the call site
 	}
+};
+
+async function uploadMappingTable(
+	selectedElements, // Array of selected domain IDs
+	elements, // Full list of domains (contains id, title, etc.)
+	initialElements, // Initially selected domain IDs
+	propertyKey, // The property key to match (not relevant for IDs here)
+	insertTableName, // Name of the table to insert relations into
+	knownElementId, // ID of the known element (e.g., post ID)
+	firstColumnId, // Column name for the first foreign key (e.g., postId)
+	secondColumnId // Column name for the second foreign key (e.g., domainId)
+) {
+	if (!selectedElements || !elements || selectedElements.length === 0) {
+		console.warn("No data to process.");
+		return;
+	}
+
+	// Find relations to add (IDs in `selectedElements` but not in `initialElements`)
+	const relationsToAdd = selectedElements.filter(
+		(selectedId) => !initialElements.includes(selectedId)
+	);
+
+	// Find relations to remove (IDs in `initialElements` but not in `selectedElements`)
+	const relationsToRemove = initialElements.filter(
+		(initialId) => !selectedElements.includes(initialId)
+	);
+
+	// Prepare inserts for new relations
+	const inserts = relationsToAdd
+		.map((selectedId) => {
+			const matchedDomain = elements.find(
+				(item) => item.id === selectedId
+			);
+			if (matchedDomain) {
+				return {
+					[firstColumnId]: knownElementId, // e.g., postId
+					[secondColumnId]: matchedDomain.id, // e.g., domainId
+				};
+			}
+			return null; // Gracefully handle unmatched IDs
+		})
+		.filter(Boolean); // Remove nulls
+
+	// Insert new relations
+	if (inserts.length > 0) {
+		const existingEntries = await supabase
+			.from(insertTableName)
+			.select("*")
+			.in(firstColumnId, [knownElementId])
+			.in(
+				secondColumnId,
+				inserts.map((insert) => insert[secondColumnId])
+			);
+
+		const existingIds = existingEntries.data.map(
+			(entry) => entry[secondColumnId]
+		);
+
+		// Only insert if the relation doesn't already exist
+		const newInserts = inserts.filter(
+			(insert) => !existingIds.includes(insert[secondColumnId])
+		);
+
+		if (newInserts.length > 0) {
+			const { error: insertError } = await supabase
+				.from(insertTableName)
+				.insert(newInserts);
+
+			if (insertError) throw insertError;
+		}
+	}
+
+	// Remove old relations
+	if (relationsToRemove.length > 0) {
+		const idsToRemove = relationsToRemove
+			.map((id) => {
+				const matchedDomain = elements.find((item) => item.id === id);
+				return matchedDomain ? matchedDomain.id : null;
+			})
+			.filter(Boolean); // Remove nulls
+
+		if (idsToRemove.length > 0) {
+			const { error: deleteError } = await supabase
+				.from(insertTableName)
+				.delete()
+				.eq(firstColumnId, knownElementId)
+				.in(secondColumnId, idsToRemove);
+
+			if (deleteError) throw deleteError;
+		}
+	}
+}
+
+export const toggleSelection = (itemId, setFunction, defaultValue) => {
+	setFunction((prev) => {
+		// If "Other" is selected, deselect all other domains
+		if (itemId === defaultValue) {
+			return [defaultValue];
+		}
+
+		// If any domain other than "Other" is selected, ensure "Other" is not in the list
+		if (prev.includes(defaultValue)) {
+			return [itemId];
+		}
+
+		// Toggle the current selection
+		const updated = prev.includes(itemId)
+			? prev.filter((id) => id !== itemId) // Remove if already selected
+			: [...prev, itemId]; // Add if not selected
+
+		// Ensure "Other" is selected if no domains are selected
+		return updated.length === 0 ? [defaultValue] : updated;
+	});
 };

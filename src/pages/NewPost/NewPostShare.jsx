@@ -1,7 +1,7 @@
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import { useContext, useEffect, useState } from "react";
 import UpperNavigationBack from "../../components/Navigation/UpperNavigationBack";
-import { fetchDomains, handlePostUpload, wp } from "../../utils/common";
+import { fetchDomains, handlePostUpload, toggleSelection, wp } from "../../utils/common";
 import { colors, sizes } from "../../utils/design";
 import Chip from "../../components/Tags/Chip";
 import InputField from "../../components/Inputs/InputField";
@@ -15,10 +15,9 @@ export default function NewPostShare({ route }) {
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [caption, setCaption] = useState("");
 	const [domains, setDomains] = useState([]);
+	const [selectedDomains, setSelectedDomains] = useState(["Other"]);
 	const [isLoading, setIsLoading] = useState(false);
 	const { user } = useContext(UserContext);
-
-	const [selectedChip, setSelectedChip] = useState(null);
 
 	useEffect(() => {
 		async function fetchData() {
@@ -48,7 +47,7 @@ export default function NewPostShare({ route }) {
 	};
 	return (
 		<View style={styles.container}>
-			<UpperNavigationBack type="back" showNext={false} showBack={true}/>
+			<UpperNavigationBack type="back" showNext={false} showBack={true} />
 			<View style={styles.carouselContainer}>
 				<FlatList
 					data={selectedImages}
@@ -69,7 +68,7 @@ export default function NewPostShare({ route }) {
 						/>
 					)}
 				/>
-				{renderPaginationDots()}
+				{selectedImages.length > 1 && renderPaginationDots()}
 			</View>
 
 			<View style={styles.detailContainer}>
@@ -78,8 +77,8 @@ export default function NewPostShare({ route }) {
 					<View style={styles.domainRow}>
 						<Chip
 							text="Other"
-							active={selectedChip === "Other"} // Check if this chip is selected
-							onPress={() => setSelectedChip("Other")} // Update selected chip
+							active={selectedDomains.includes("Other")}
+							onPress={() => toggleSelection("Other", setSelectedDomains, "Other")}
 						/>
 						<FlatList
 							data={domains}
@@ -87,8 +86,10 @@ export default function NewPostShare({ route }) {
 							renderItem={({ item }) => (
 								<Chip
 									text={item.title}
-									active={selectedChip === item.id} // Check if this chip is selected
-									onPress={() => setSelectedChip(item.id)} // Update selected chip
+									active={selectedDomains.includes(item.id)}
+									onPress={() =>
+										toggleSelection(item.id, setSelectedDomains, "Other")
+									}
 								/>
 							)}
 							horizontal
@@ -107,23 +108,25 @@ export default function NewPostShare({ route }) {
 						placeholder="Type here..."
 					/>
 				</View>
-                <View style={styles.buttonWrapper}>
-				<Button
-					variant="primary"
-					state="default"
-					size="medium"
-					label="Share Post"
-					isLoading={isLoading}
-					onPress={async () =>
-						await handlePostUpload(
-							navigation,
-							selectedImages,
-							caption,
-							user.id
-						)
-					}
-				/>
-                </View>
+				<View style={styles.buttonWrapper}>
+					<Button
+						variant="primary"
+						state="default"
+						size="medium"
+						label="Share Post"
+						isLoading={isLoading}
+						onPress={async () =>
+							await handlePostUpload(
+								navigation,
+								selectedImages,
+								caption,
+								user.id,
+								selectedDomains,
+                                domains
+							)
+						}
+					/>
+				</View>
 			</View>
 		</View>
 	);
@@ -175,7 +178,7 @@ const styles = StyleSheet.create({
 	inputWrapper: {
 		flexDirection: "row",
 	},
-    buttonWrapper: {
+	buttonWrapper: {
 		flexDirection: "row",
 	},
 });
