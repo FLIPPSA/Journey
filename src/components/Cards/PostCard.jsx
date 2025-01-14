@@ -129,12 +129,14 @@ export default function PostCard({
 
 	useEffect(() => {
 		const fetchIsLiked = async () => {
+            setCurrentLikeCount(likes);
 			const liked = await fetchUserLikedPostCheck(user.id, id);
+            console.log('Checking liking.... liked:', liked)
 			setIsLiked(liked);
 		};
 
 		fetchIsLiked();
-	}, []);
+	}, [id]);
 
 	const renderPaginationDots = () =>
 		images.length > 1 ? (

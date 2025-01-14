@@ -57,7 +57,9 @@ export default function Tabs({
 const styles = StyleSheet.create({
 	container: {
 		width: "100%",
-		alignItems: "center",
 		flexDirection: "row",
+		justifyContent: "space-evenly", // Ensure even spacing between tabs
+		alignItems: "center",
+		flexWrap: "nowrap", // Prevent wrapping to the next line
 	},
 });

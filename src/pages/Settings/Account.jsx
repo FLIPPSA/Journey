@@ -1,15 +1,18 @@
 import { StyleSheet, Text, View, Alert } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import AvatarBlock from "../../components/Avatars/AvatarBlock";
 import UpperNavigationBack from "../../components/Navigation/UpperNavigationBack";
 import InputField from "../../components/Inputs/InputField";
 import { sizes } from "../../utils/design";
 import * as ImagePicker from "expo-image-picker";
+import UserContext from "../../utils/authentication";
+import { deleteFileFromStorage, updateRowToDatabase, uploadFileToStorage } from "../../utils/common";
 
 export default function Account({ route }) {
 	const usernameRef = useRef(null);
 	const emailRef = useRef(null);
-	const { user, navigation } = route.params;
+	const {user, setUser} = useContext(UserContext);
+    const [isUploading, setIsUploading] = useState(false);
 
 	// State to store the selected profile picture URI
 	const [profilePicture, setProfilePicture] = useState(user.profilePicture);
@@ -36,8 +39,44 @@ export default function Account({ route }) {
         });
 
 		if (!pickerResult.canceled) {
-			// Update the profile picture with the selected image URI
-			setProfilePicture(pickerResult.assets[0].uri);
+			const selectedImageUri = pickerResult.assets[0].uri;
+
+            // Upload the image
+			handleProfilePictureUpload(selectedImageUri);
+		}
+	};
+
+	const handleProfilePictureUpload = async (uri) => {
+		setIsUploading(true);
+		try {
+			// Delete the existing profile picture if it exists
+			if (user.profilePicture) {
+				await deleteFileFromStorage(user.profilePicture);
+			}
+
+			// Upload the new profile picture
+			const uploadedImageUrl = await uploadFileToStorage(uri, "ProfilePictures");
+
+			// Update the user's profile in the database
+			await updateRowToDatabase(
+				"users",
+				{ profilePicture: uploadedImageUrl },
+				user.id
+			);
+
+			// Update the profile picture state
+			setProfilePicture(uploadedImageUrl);
+
+			setUser((prevUser) => ({
+				...prevUser,
+				profilePicture: uploadedImageUrl
+			}));
+
+		} catch (error) {
+			console.error("Error uploading profile picture:", error);
+			Alert.alert("Error", "Failed to update profile picture.");
+		} finally {
+			setIsUploading(false);
 		}
 	};
 
@@ -54,7 +93,7 @@ export default function Account({ route }) {
 					layout="centered"
 					showDescription={false}
 					name="Upload Image"
-					avatarUri={profilePicture}
+					imageUri={profilePicture}
 					onPress={handleOpenGallery} // Open the gallery on press
 				/>
 
@@ -66,6 +105,7 @@ export default function Account({ route }) {
 						hasLabel={true}
 						label="Username"
 						value={user.username}
+                        editable={false}
 						// onChangeText={setUsername}
 					/>
 				</View>
@@ -77,6 +117,7 @@ export default function Account({ route }) {
 						hasLabel={true}
 						label="Email"
 						value={user.email}
+                        editable={false}
 						// onChangeText={setEmail}
 					/>
 				</View>

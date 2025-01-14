@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
 	},
 	domainRow: {
 		flexDirection: "row",
-		gap: sizes.space[16],
+		gap: sizes.space[12],
 	},
 	inputWrapper: {
 		flexDirection: "row",

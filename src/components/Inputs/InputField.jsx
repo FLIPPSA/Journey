@@ -18,6 +18,7 @@ const InputField = forwardRef(
 			rightIcon = null,
 			placeholder = "Type here...",
 			rightOnPress = () => {},
+            editable = true
 		},
 		ref
 	) => {
@@ -55,6 +56,7 @@ const InputField = forwardRef(
 						placeholderTextColor={colors.text.default.secondary()}
 						onFocus={() => setIsFocused(true)}
 						onBlur={() => setIsFocused(false)}
+                        editable={editable}
 					/>
 					{rightIcon && (
 						<Feather

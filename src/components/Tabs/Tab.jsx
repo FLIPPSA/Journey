@@ -11,7 +11,11 @@ export default function Tab({ active, label = "Tab", onPress }) {
 				active ? styles.activeTab : styles.inactiveTab,
 			]}
 		>
-			<Text style={[styles.label, active && styles.activeLabel]}>
+			<Text
+				numberOfLines={1} // Ensure the text is truncated if it overflows
+				ellipsizeMode="tail" // Add ellipsis for overflow
+				style={[styles.label, active && styles.activeLabel]}
+			>
 				{label}
 			</Text>
 		</Pressable>
@@ -20,7 +24,8 @@ export default function Tab({ active, label = "Tab", onPress }) {
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1,
+		flex: 1, // Evenly distribute tabs
+		minWidth: 80, // Minimum width for each tab
 		paddingVertical: sizes.space[8],
 		paddingHorizontal: sizes.space[12],
 		borderBottomWidth: sizes.stroke[1],
@@ -39,7 +44,7 @@ const styles = StyleSheet.create({
 		fontSize: typography.primitives.scale[13],
 		fontFamily: typography.primitives.family,
 		color: colors.text.default.secondary(),
-		textAlign: "left",
+		textAlign: "center",
 	},
 	activeLabel: {
 		fontWeight: typography.primitives.weight.bold,

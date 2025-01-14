@@ -17,9 +17,12 @@ import {
 	approveFriendRequest,
 	denyFriendRequest,
 	fetchDiscoverUsers,
+	fetchDomains,
 	fetchFriends,
 	fetchPendingFriendRequests,
+	fetchPosts,
 	fetchUserPosts,
+	toggleSelection,
 } from "../../utils/common";
 import Search from "../../components/Inputs/Search";
 import FriendBlock from "../../components/Avatars/FriendBlock";
@@ -31,6 +34,8 @@ export default function Profile({ navigation }) {
 	const [friends, setFriends] = useState([]);
 	const [allUsers, setAllUsers] = useState([]);
 	const [pendingRequests, setPendingRequests] = useState([]);
+	const [domains, setDomains] = useState([]);
+	const [selectedDomains, setSelectedDomains] = useState(["All"]);
 
 	const { user } = useContext(UserContext);
 
@@ -42,9 +47,18 @@ export default function Profile({ navigation }) {
 	const [postRefreshing, setPostRefreshing] = useState(false);
 	const [friendRefreshing, setFriendRefreshing] = useState(false);
 
-	// useEffect(() => {
-	// 	setSearchQuery("");
-	// }, [activeTab]);
+	useEffect(() => {
+		async function fetchData() {
+			const fetchedDomains = await fetchDomains();
+			setDomains(fetchedDomains);
+		}
+		fetchData();
+	}, []);
+
+	// Initial data fetch
+	useEffect(() => {
+		fetchUserPostsFunction();
+	}, [selectedDomains]); // Refetch posts whenever selectedDomains change
 
 	const handleApproveFriendRequest = async (senderId) => {
 		setApproveLoading(true);
@@ -126,7 +140,7 @@ export default function Profile({ navigation }) {
 
 	const fetchUserPostsFunction = async () => {
 		try {
-			const fetchedPosts = await fetchUserPosts(user.id);
+			const fetchedPosts = await fetchUserPosts(user.id, selectedDomains);
 			setPosts(fetchedPosts);
 		} catch (error) {
 			console.error("Error fetching posts:", error);
@@ -139,8 +153,6 @@ export default function Profile({ navigation }) {
 		fetchFriendsFunction();
 		fetchPendingFriendRequestsFunction();
 		fetchDiscoverUsersFunction();
-
-		console.log("Pending requests:", pendingRequests);
 	}, []);
 
 	// Fetch discovery users when searchQuery changes
@@ -174,7 +186,7 @@ export default function Profile({ navigation }) {
 				return (
 					<View style={[styles.screen, styles.contentContainer]}>
 						<View style={styles.searchContainer}>
-							<Search onSearch={setSearchQuery}/>
+							<Search onSearch={setSearchQuery} />
 						</View>
 						<FlatList
 							data={filteredFriends}
@@ -228,7 +240,39 @@ export default function Profile({ navigation }) {
 						>
 							<Text style={styles.filterByText}>Filter By:</Text>
 							<View style={styles.chips}>
-								<Chip text="All" />
+								<Chip
+									text="All"
+									active={selectedDomains.includes("All")}
+									onPress={() =>
+										toggleSelection(
+											"All",
+											setSelectedDomains,
+											"All"
+										)
+									}
+								/>
+								<FlatList
+									data={domains}
+									keyExtractor={(item) => item.id.toString()}
+									renderItem={({ item }) => (
+										<Chip
+											text={item.title}
+											active={selectedDomains.includes(
+												item.id
+											)}
+											onPress={() =>
+												toggleSelection(
+													item.id,
+													setSelectedDomains,
+													"All"
+												)
+											}
+										/>
+									)}
+									horizontal
+									contentContainerStyle={styles.domainRow}
+									showsHorizontalScrollIndicator={false}
+								/>
 							</View>
 						</View>
 						<FlatList
@@ -257,7 +301,8 @@ export default function Profile({ navigation }) {
 							}}
 							contentContainerStyle={styles.flatlistContent}
 							keyboardShouldPersistTaps="handled"
-							numColumns={4}
+							numColumns={3}
+							key={`numColumns-${3}`} // Dynamically set the key
 							ListFooterComponent={
 								<View style={styles.footerSpacing} />
 							}
@@ -349,11 +394,11 @@ export default function Profile({ navigation }) {
 			<ProfileNavigation profileName={user.username} showBack={false} />
 			<Tabs
 				label1="Friends"
-                showTab2={true}
+				showTab2={true}
 				label2="Achievements"
-                showTab3={true}
+				showTab3={true}
 				label3="Posts"
-                showTab4={true}
+				showTab4={true}
 				label4="Discover"
 				showTab5={false}
 				activeTab={activeTab}
@@ -383,6 +428,7 @@ const styles = StyleSheet.create({
 	},
 	chips: {
 		flexDirection: "row",
+        gap: sizes.space[8],
 	},
 	imageWrapper: {
 		flex: 1, // Equal space for each image
@@ -395,7 +441,7 @@ const styles = StyleSheet.create({
 	flatlistContent: {
 		paddingBottom: sizes.space[24],
 		backgroundColor: colors.primitives.gray[900],
-		flex: 1,
+		// flex: 1,
 	},
 	footerSpacing: {
 		height: sizes.space[16],
@@ -419,5 +465,8 @@ const styles = StyleSheet.create({
 	},
 	searchContainer: {
 		paddingBottom: sizes.space[8],
+	},
+    domainRow: {
+		gap: sizes.space[8],
 	},
 });
