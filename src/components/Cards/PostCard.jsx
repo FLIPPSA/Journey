@@ -29,6 +29,7 @@ import Commenting from "../../pages/Homepage/Commenting";
 import Link from "../Navigation/Link";
 import { TouchableOpacity } from "react-native";
 import Sharing from "../../pages/Homepage/Sharing";
+import { useNavigation } from "expo-router";
 
 export default function PostCard({
 	user,
@@ -59,6 +60,8 @@ export default function PostCard({
 	const heartScaleAnim = useRef(new Animated.Value(0)).current;
 	const heartOpacityAnim = useRef(new Animated.Value(1)).current;
 	const lastTap = useRef(null);
+
+	const navigation = useNavigation();
 
 	const handleCaptionToggle = () => {
 		setCaptionIsExpanded((prev) => !prev);
@@ -129,9 +132,8 @@ export default function PostCard({
 
 	useEffect(() => {
 		const fetchIsLiked = async () => {
-            setCurrentLikeCount(likes);
+			setCurrentLikeCount(likes);
 			const liked = await fetchUserLikedPostCheck(user.id, id);
-            console.log('Checking liking.... liked:', liked)
 			setIsLiked(liked);
 		};
 
@@ -386,6 +388,11 @@ export default function PostCard({
 							state="default"
 							size="small"
 							label="Try it!"
+							onPress={() =>
+								navigation.navigate("NavBar", {
+									screen: "Tasklist", // Specify "Tasklist" as the target screen
+								})
+							}
 						/>
 					</View>
 				</View>

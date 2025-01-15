@@ -417,6 +417,8 @@ const styles = StyleSheet.create({
 	screen: {
 		flex: 1,
 		width: "100%",
+        gap: sizes.space[32],
+        paddingTop: sizes.space[16],
 	},
 	category: {
 		gap: sizes.space[4],

@@ -62,7 +62,6 @@ export default function Login({ navigation }) {
 						label="Remember Me"
 						hasDescription={false}
 					/>
-					<Text>Hey</Text>
 				</View>
 			</View>
 

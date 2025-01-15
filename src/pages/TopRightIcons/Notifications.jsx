@@ -1,12 +1,17 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, View } from "react-native";
+import React from "react";
+import UpperNavigationBack from "../../components/Navigation/UpperNavigationBack";
 
 export default function Notifications() {
-  return (
-    <View>
-      <Text>Notifications</Text>
-    </View>
-  )
+	return (
+		<View>
+			<UpperNavigationBack
+				heading="Notifications"
+				showBack={true}
+			/>
+			<Text>Notifications</Text>
+		</View>
+	);
 }
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({});

@@ -54,9 +54,9 @@ export default function UpperNavigationBack({
 					/>
 				</View>
 			)}
-			{!showIcon && type === "message" && (
+			{/* {!showIcon && type === "message" && (
 				<View style={styles.widthContainer} />
-			)}
+			)} */}
             {!showIcon && !showNext && <View style={styles.widthContainer} />}
 		</View>
 	);

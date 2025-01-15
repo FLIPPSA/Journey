@@ -75,7 +75,6 @@ export default function SignUp({ navigation }) {
 						label="Remember Me"
 						hasDescription={false}
 					/>
-					<Text>Hey</Text>
 				</View>
 			</View>
 
