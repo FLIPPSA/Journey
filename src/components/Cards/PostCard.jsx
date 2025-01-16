@@ -397,9 +397,9 @@ export default function PostCard({
 					</View>
 				</View>
 
-				<View style={styles.mid}>
+				{/* <View style={styles.mid}>
 					<Text style={styles.likes}>Liked by {likes}</Text>
-				</View>
+				</View> */}
 
 				<View style={styles.mid}>
 					<Text

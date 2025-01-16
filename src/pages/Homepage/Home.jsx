@@ -1,4 +1,11 @@
-import { Image, StyleSheet, View, Text, FlatList } from "react-native";
+import {
+	Image,
+	StyleSheet,
+	View,
+	Text,
+	FlatList,
+	ActivityIndicator,
+} from "react-native";
 import UpperNavigation from "../../components/Navigation/UpperNavigation";
 import PostCard from "../../components/Cards/PostCard";
 import { useContext, useEffect, useState } from "react";
@@ -13,6 +20,7 @@ export default function Home({ route }) {
 	const { user } = useContext(UserContext);
 	const [domains, setDomains] = useState([]);
 	const [selectedDomains, setSelectedDomains] = useState(["All"]);
+	const [loading, setLoading] = useState(true);
 
 	const [showPostUploadNotification, setShowPostUploadNotification] = useState(false);
 
@@ -49,10 +57,13 @@ export default function Home({ route }) {
 	// Fetch data function
 	const fetchPostsFunction = async () => {
 		try {
+			setLoading(true); // Start loading indicator
 			const fetchedPosts = await fetchPosts(selectedDomains);
 			setPosts(fetchedPosts);
 		} catch (error) {
 			console.error("Error fetching posts:", error);
+		} finally {
+			setLoading(false); // Stop loading indicator
 		}
 	};
 
@@ -77,33 +88,38 @@ export default function Home({ route }) {
 				selectedDomains={selectedDomains}
 				setSelectedDomains={setSelectedDomains}
 			/>
-			<FlatList
-				data={posts}
-				keyExtractor={(item) => item.id}
-				renderItem={({ item }) => {
-					const images = Array.isArray(item.fileUrls)
-						? item.fileUrls
-						: JSON.parse(item.fileUrls || "[]");
-					return (
-						<PostCard
-							user={user}
-							id={item.id}
-							name={item.name}
-							time={item.time}
-							caption={item.caption}
-							images={images}
-							avatar={item.avatar}
-							likes={item.likeCount}
-							commentCount={item.commentCount}
-						/>
-					);
-				}}
-				contentContainerStyle={styles.flatlistContent}
-				keyboardShouldPersistTaps="handled"
-				ListFooterComponent={<View style={styles.footerSpacing} />}
-				refreshing={refreshing} // Show the refreshing indicator
-				onRefresh={handleRefresh} // Triggered when pulled down
-			/>
+
+			{loading ? (
+				<ActivityIndicator size="large" color={"#82581C"} style={{paddingTop: sizes.space[16]}}/>
+			) : (
+				<FlatList
+					data={posts}
+					keyExtractor={(item) => item.id}
+					renderItem={({ item }) => {
+						const images = Array.isArray(item.fileUrls)
+							? item.fileUrls
+							: JSON.parse(item.fileUrls || "[]");
+						return (
+							<PostCard
+								user={user}
+								id={item.id}
+								name={item.name}
+								time={item.time}
+								caption={item.caption}
+								images={images}
+								avatar={item.avatar}
+								likes={item.likeCount}
+								commentCount={item.commentCount}
+							/>
+						);
+					}}
+					contentContainerStyle={styles.flatlistContent}
+					keyboardShouldPersistTaps="handled"
+					ListFooterComponent={<View style={styles.footerSpacing} />}
+					refreshing={refreshing} // Show the refreshing indicator
+					onRefresh={handleRefresh} // Triggered when pulled down
+				/>
+			)}
 		</View>
 	);
 }
